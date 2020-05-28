@@ -15,6 +15,9 @@ use object::Object;
 // FPS Limit
 const LIMIT_FPS: i32 = 20;
 
+// Player pos in vec
+pub const PLAYER: usize = 0;
+
 // FOV
 const FOV_ALGO: FovAlgorithm = FovAlgorithm::Basic;
 const FOV_LIGHT_WALLS: bool = true;
@@ -24,18 +27,27 @@ pub struct Game {
     map: Map,
 }
 
-fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recompute: bool) {
+struct Tcod {
+    root: Root,
+    con: Offscreen,
+    fov: FovMap,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum PlayerAction {
+    TookTurn,
+    DidntTakeTurn,
+    Exit,
+}
+
+use PlayerAction::*;
+
+fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &Vec<Object>, fov_recompute: bool) {
     if fov_recompute {
-        let player = &objects[0];
+        let player = &objects[PLAYER];
         tcod.fov.compute_fov(player.x, player.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO);
     }
     
-    for object in objects {
-        if tcod.fov.is_in_fov(object.x, object.y) {
-            object.draw(&mut tcod.con);
-        }
-    }
-
     for x in 0..map::MAP_WIDTH {
         for y in 0..map::MAP_HEIGHT {
             let visible = tcod.fov.is_in_fov(x, y);
@@ -57,7 +69,16 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recomput
             }
         }
     }
+    
+    for object in objects {
+        if tcod.fov.is_in_fov(object.x, object.y) {
+            object.draw(&mut tcod.con);
+        } else {
+            //tcod.con.set_char_foreground(object.x, object.y, BLACK);
 
+        }
+    }
+    
     blit(
         &tcod.con,
         (0, 0),
@@ -69,37 +90,45 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &[Object], fov_recomput
     );
 }
 
-struct Tcod {
-    root: Root,
-    con: Offscreen,
-    fov: FovMap,
-}
 
-fn handle_keys(tcod: &mut Tcod, game: &Game, player: &mut Object) -> bool {
+
+fn handle_keys(tcod: &mut Tcod, game: &Game, objects: &mut Vec<Object>) -> PlayerAction {
     use tcod::input::Key;
     use tcod::input::KeyCode::*;
     
     let key = tcod.root.wait_for_keypress(true);
-    match key {
-        Key {
+    let player_alive = objects[PLAYER].alive;
+    match (key, key.text(), player_alive) {
+        (Key {
             code: Enter,
             alt: true,
             ..
-        } => {
+        }, _, _) => {
             let fullscreen = tcod.root.is_fullscreen();
             tcod.root.set_fullscreen(!fullscreen);
+            DidntTakeTurn
         }
 
-        Key { code: Escape, .. } => return true,
-        Key { code: Up, .. } => player.move_by(0, -1, game),
-        Key { code: Down, .. } => player.move_by(0, 1, game),
-        Key { code: Left, .. } => player.move_by(-1, 0, game),
-        Key { code: Right, .. } => player.move_by(1, 0, game),
+        (Key { code: Escape, .. }, _, _) => Exit,
+        (Key { code: Up, .. }, _, _) => {
+            map::player_move_or_attack(0, -1, game, objects);
+            TookTurn
+        }
+        (Key { code: Down, .. }, _, _) => {
+            map::player_move_or_attack(0, 1, game, objects);
+            TookTurn
+        }
+        (Key { code: Left, .. }, _, _) => {
+            map::player_move_or_attack(-1, 0, game, objects);
+            TookTurn
+        }
+        (Key { code: Right, .. }, _, _) => {
+            map::player_move_or_attack(1, 0, game, objects);
+            TookTurn
+        }
 
-        _ => {}
+        _ => DidntTakeTurn,
     }
-
-    false
 }
 
 fn main() {
@@ -119,15 +148,16 @@ fn main() {
     };
     
     // Player
-    let player = Object::new(0, 0, '@', WHITE);
+    let mut player = Object::new(0, 0, '@', WHITE, "player", false);
+    player.alive = true;
     
-    // NPC
-    let npc = Object::new(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', YELLOW);
-    
-    let mut objects = [player, npc];
+    // // NPC
+    // let npc = Object::new(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', YELLOW);
+
+    let mut objects = vec![player];
 
     let mut game = Game {
-        map: map::make_map(&mut objects[0]),
+        map: map::make_map(&mut objects),
     };
 
     // Populate FOV map
@@ -152,16 +182,24 @@ fn main() {
         }
 
         // render
-        let fov_recompute = previous_player_position != (objects[0].x, objects[0].y);
+        let fov_recompute = previous_player_position != (objects[PLAYER].pos());
         render_all(&mut tcod, &mut game, &objects, fov_recompute);
 
         tcod.root.flush();
 
-        let player = &mut objects[0];
+        let player = &mut objects[PLAYER];
         previous_player_position = (player.x, player.y);
-        let exit = handle_keys(&mut tcod, &game, player);
-        if exit {
+        let player_action = handle_keys(&mut tcod, &game, &mut objects);
+        if player_action == PlayerAction::Exit {
             break;
+        }
+
+        if objects[PLAYER].alive && player_action != PlayerAction::DidntTakeTurn {
+            for object in &objects {
+                if (object as *const _) != (&objects[PLAYER] as *const _) {
+                    println!("The {} growls!", object.name);
+                }
+            } 
         }
     }
 }

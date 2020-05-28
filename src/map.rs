@@ -3,6 +3,8 @@ use rand::Rng;
 use tcod::colors::*;
 
 use crate::Object;
+use crate::PLAYER;
+use crate::Game;
 
 pub const MAP_WIDTH: i32 = 80;
 pub const MAP_HEIGHT: i32 = 45;
@@ -11,6 +13,9 @@ pub const COLOR_DARK_WALL: Color = Color { r: 0, g: 0, b: 100 };
 pub const COLOR_DARK_GROUND: Color = Color { r: 50, g: 50, b: 150 };
 pub const COLOR_LIGHT_WALL: Color = Color { r: 130, g: 110, b: 50 };
 pub const COLOR_LIGHT_GROUND: Color = Color { r: 200, g: 180, b: 50};
+
+// Monster limit
+const MAX_ROOM_MONSTERS: i32 = 3;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Tile {
@@ -44,7 +49,7 @@ const ROOM_MIN_SIZE: i32 = 6;
 const MAX_ROOMS: i32 = 30;
 
 #[derive(Clone, Copy, Debug)]
-struct Rect {
+pub struct Rect {
     x1: i32,
     y1: i32,
     x2: i32,
@@ -95,7 +100,7 @@ fn create_v_tunnel(y1: i32, y2: i32, x: i32, map: &mut Map) {
     }
 }
 
-pub fn make_map(player: &mut Object) -> Map {
+pub fn make_map(objects: &mut Vec<Object>) -> Map {
   let mut map = vec![vec![Tile::wall(); MAP_HEIGHT as usize]; MAP_WIDTH as usize];
   
   let mut rooms = vec![];
@@ -112,12 +117,13 @@ pub fn make_map(player: &mut Object) -> Map {
       if !failed {
           create_room(new_room, &mut map);
 
+          place_objects(new_room, &map, objects);
+
           let (new_x, new_y) = new_room.center();
 
           if rooms.is_empty() {
               // Starting room
-              player.x = new_x;
-              player.y = new_y;
+              objects[PLAYER].set_pos(new_x, new_y);
           } else {
               // All other rooms
               
@@ -139,4 +145,62 @@ pub fn make_map(player: &mut Object) -> Map {
   }
 
   map
+}
+
+fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
+    let num_monsters = rand::thread_rng().gen_range(0, MAX_ROOM_MONSTERS + 1);
+
+    for _ in 0..num_monsters {
+        let x = rand::thread_rng().gen_range(room.x1 + 1, room.x2);
+        let y = rand::thread_rng().gen_range(room.y1 + 1, room.y2);
+        
+        if !is_blocked(x, y, map, objects) {
+            let mut monster = if rand::random::<f32>() < 0.8 {
+                Object::new(x, y, 'o', DESATURATED_GREEN, "ork", true)
+            } else {
+                Object::new(x, y, 'T', DARKER_GREEN, "troll", true)
+            };
+            
+            monster.alive = true;
+            objects.push(monster);
+        }
+    }
+}
+
+fn is_blocked(x: i32, y: i32, map: &Map, objects: &Vec<Object>) -> bool {
+    if map[x as usize][y as usize].blocked {
+        return true;
+    }
+
+    objects
+        .iter()
+        .any(|object| object.blocks && object.pos() == (x, y))
+}
+
+pub fn move_by(id: usize, dx: i32, dy: i32, map: &Map, objects: &mut Vec<Object>) {
+    let (x, y) = objects[id].pos();
+
+    if !is_blocked(x + dx, y + dy, map, objects) {
+        objects[id].set_pos(x + dx, y + dy);
+    }
+}
+
+pub fn player_move_or_attack(dx: i32, dy: i32, game: &Game, objects: &mut Vec<Object>) {
+    let x = objects[PLAYER].x + dx;
+    let y = objects[PLAYER].y + dy;
+
+    let target_id = objects.iter().position(|object| object.pos() == (x, y));
+
+    match target_id {
+        Some(target_id) => {
+            println!(
+                "The {} laughs at your puny efforts to attack him!",
+                objects[target_id].name
+            );
+        }
+
+        None => {
+            move_by(PLAYER, dx, dy, &game.map, objects);
+        }
+    }
 }
