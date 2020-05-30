@@ -2,9 +2,13 @@ use std::cmp;
 use rand::Rng;
 use tcod::colors::*;
 
-use crate::Object;
-use crate::PLAYER;
-use crate::Game;
+// use crate::Object;
+// use crate::PLAYER;
+// use crate::Game;
+// use crate::Fighter;
+// use crate::Ai;
+use crate::*;
+use crate::misc::help::mut_two;
 
 pub const MAP_WIDTH: i32 = 80;
 pub const MAP_HEIGHT: i32 = 45;
@@ -156,12 +160,28 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
         
         if !is_blocked(x, y, map, objects) {
             let mut monster = if rand::random::<f32>() < 0.8 {
-                Object::new(x, y, 'o', DESATURATED_GREEN, "ork", true)
+                let mut ork = Object::new(x, y, 'o', DESATURATED_GREEN, "ork", true);
+                ork.alive = true;
+                ork.fighter = Some(Fighter {
+                    max_hp: 10,
+                    hp: 10,
+                    defense: 0,
+                    power: 3,
+                });
+                ork.ai = Some(Ai::Basic);
+                ork
             } else {
-                Object::new(x, y, 'T', DARKER_GREEN, "troll", true)
+                let mut troll = Object::new(x, y, 'T', DARKER_GREEN, "troll", true);
+                troll.alive = true;
+                troll.fighter = Some(Fighter {
+                    max_hp: 16,
+                    hp: 16,
+                    defense: 1,
+                    power: 4,
+                });
+                troll.ai = Some(Ai::Basic);
+                troll
             };
-            
-            monster.alive = true;
             objects.push(monster);
         }
     }
@@ -193,10 +213,8 @@ pub fn player_move_or_attack(dx: i32, dy: i32, game: &Game, objects: &mut Vec<Ob
 
     match target_id {
         Some(target_id) => {
-            println!(
-                "The {} laughs at your puny efforts to attack him!",
-                objects[target_id].name
-            );
+            let (player, target) = mut_two(PLAYER, target_id, objects);
+            player.attack(target);
         }
 
         None => {

@@ -2,15 +2,18 @@ use tcod::colors::*;
 use tcod::console::*;
 use tcod::map::{FovAlgorithm, Map as FovMap};
 
-mod map;
-mod object;
+mod misc;
 
 // Window size
 const SCREEN_WIDTH: i32 = 80;
 const SCREEN_HEIGHT: i32 = 50;
 
-use map::Map;
-use object::Object;
+use misc::ai;
+use misc::map;
+use misc::map::Map;
+use misc::object::Object;
+use misc::object::Fighter;
+use misc::object::Ai;
 
 // FPS Limit
 const LIMIT_FPS: i32 = 20;
@@ -27,7 +30,7 @@ pub struct Game {
     map: Map,
 }
 
-struct Tcod {
+pub struct Tcod {
     root: Root,
     con: Offscreen,
     fov: FovMap,
@@ -88,6 +91,17 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &Vec<Object>, fov_recom
         1.0,
         1.0,
     );
+
+    tcod.root.set_default_background(WHITE);
+    if let Some(fighter) = objects[PLAYER].fighter {
+        tcod.root.print_ex(
+            1,
+            SCREEN_HEIGHT - 2,
+            BackgroundFlag::None,
+            TextAlignment::Left,
+            format!("HP: {}/{}",fighter.hp, fighter.max_hp)
+        );
+    }
 }
 
 
@@ -150,10 +164,13 @@ fn main() {
     // Player
     let mut player = Object::new(0, 0, '@', WHITE, "player", false);
     player.alive = true;
+    player.fighter = Some(Fighter {
+        max_hp: 30,
+        hp: 30,
+        defense: 2,
+        power: 5,
+    });
     
-    // // NPC
-    // let npc = Object::new(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', YELLOW);
-
     let mut objects = vec![player];
 
     let mut game = Game {
@@ -195,11 +212,11 @@ fn main() {
         }
 
         if objects[PLAYER].alive && player_action != PlayerAction::DidntTakeTurn {
-            for object in &objects {
-                if (object as *const _) != (&objects[PLAYER] as *const _) {
-                    println!("The {} growls!", object.name);
+            for id in 0..objects.len() {
+                if objects[id].ai.is_some() {
+                    ai::ai_take_turn(id, &tcod, &game, &mut objects);
                 }
-            } 
+            }
         }
     }
 }
