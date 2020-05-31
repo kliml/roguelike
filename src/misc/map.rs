@@ -9,6 +9,7 @@ use tcod::colors::*;
 // use crate::Ai;
 use crate::*;
 use crate::misc::help::mut_two;
+use crate::misc::object::DeathCallback;
 
 pub const MAP_WIDTH: i32 = 80;
 pub const MAP_HEIGHT: i32 = 45;
@@ -159,7 +160,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
         let y = rand::thread_rng().gen_range(room.y1 + 1, room.y2);
         
         if !is_blocked(x, y, map, objects) {
-            let mut monster = if rand::random::<f32>() < 0.8 {
+            let monster = if rand::random::<f32>() < 0.8 {
                 let mut ork = Object::new(x, y, 'o', DESATURATED_GREEN, "ork", true);
                 ork.alive = true;
                 ork.fighter = Some(Fighter {
@@ -167,6 +168,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
                     hp: 10,
                     defense: 0,
                     power: 3,
+                    on_death: DeathCallback::Monster,
                 });
                 ork.ai = Some(Ai::Basic);
                 ork
@@ -178,6 +180,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
                     hp: 16,
                     defense: 1,
                     power: 4,
+                    on_death: DeathCallback::Monster,
                 });
                 troll.ai = Some(Ai::Basic);
                 troll
@@ -209,7 +212,7 @@ pub fn player_move_or_attack(dx: i32, dy: i32, game: &Game, objects: &mut Vec<Ob
     let x = objects[PLAYER].x + dx;
     let y = objects[PLAYER].y + dy;
 
-    let target_id = objects.iter().position(|object| object.pos() == (x, y));
+    let target_id = objects.iter().position(|object| object.fighter.is_some() && object.pos() == (x, y));
 
     match target_id {
         Some(target_id) => {

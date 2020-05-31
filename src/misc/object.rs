@@ -55,6 +55,13 @@ impl Object {
                 fighter.hp -= damage;
             }
         }
+
+        if let Some(fighter) = self.fighter {
+            if fighter.hp <= 0 {
+                self.alive = false;
+                fighter.on_death.callback(self);
+            }
+        }
     }
 
     pub fn attack(&mut self, target: &mut Object) {
@@ -82,6 +89,40 @@ pub struct Fighter {
     pub hp: i32,
     pub defense: i32,
     pub power:i32,
+    pub on_death: DeathCallback,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum DeathCallback {
+    Player,
+    Monster,
+}
+
+impl DeathCallback {
+    pub fn callback(self, object: &mut Object) {
+        use DeathCallback::*;
+        let callback: fn(&mut Object) = match self {
+            Player => player_death,
+            Monster => monster_death,
+        };
+        callback(object);
+    }
+}
+
+fn player_death(player: &mut Object) {
+    println!("You died!");
+    player.char = '%';
+    player.color = DARK_RED;
+}
+
+fn monster_death(monster: &mut Object) {
+    println!("{} is dead!", monster.name);
+    monster.char = '%';
+    monster.color = DARK_RED;
+    monster.blocks = false;
+    monster.fighter = None;
+    monster.ai = None;
+    monster.name = format!("remains of {}", monster.name);
 }
 
 #[derive(Clone, Debug, PartialEq)]

@@ -14,6 +14,7 @@ use misc::map::Map;
 use misc::object::Object;
 use misc::object::Fighter;
 use misc::object::Ai;
+use misc::object::DeathCallback;
 
 // FPS Limit
 const LIMIT_FPS: i32 = 20;
@@ -73,12 +74,14 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &Vec<Object>, fov_recom
         }
     }
     
-    for object in objects {
+    let mut to_draw: Vec<_> = objects
+    .iter()
+    .filter(|o| tcod.fov.is_in_fov(o.x, o.y))
+    .collect();
+    to_draw.sort_by(|o1, o2| o1.blocks.cmp(&o2.blocks));
+    for object in &to_draw {
         if tcod.fov.is_in_fov(object.x, object.y) {
             object.draw(&mut tcod.con);
-        } else {
-            //tcod.con.set_char_foreground(object.x, object.y, BLACK);
-
         }
     }
     
@@ -169,6 +172,7 @@ fn main() {
         hp: 30,
         defense: 2,
         power: 5,
+        on_death: DeathCallback::Player,
     });
     
     let mut objects = vec![player];
