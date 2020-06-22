@@ -21,6 +21,11 @@ const BAR_WIDTH: i32 = 20;
 const PANEL_HEIGHT: i32 = 7;
 const PANEL_Y: i32 = SCREEN_HEIGHT - PANEL_HEIGHT;
 
+// Messages
+const MSG_X: i32 = BAR_WIDTH + 2;
+const MSG_WIDTH: i32 = SCREEN_WIDTH - BAR_WIDTH - 2;
+const MSG_HEIGHT: usize = PANEL_HEIGHT as usize - 1;
+
 // FPS Limit
 const LIMIT_FPS: i32 = 20;
 
@@ -32,8 +37,27 @@ const FOV_ALGO: FovAlgorithm = FovAlgorithm::Basic;
 const FOV_LIGHT_WALLS: bool = true;
 const TORCH_RADIUS: i32 = 10;
 
+pub struct Messages {
+    messages: Vec<(String, Color)>,
+}
+
+impl Messages {
+    pub fn new() -> Self {
+        Self { messages: vec![] }
+    }
+
+    pub fn add<T: Into<String>>(&mut self, message: T, color: Color) {
+        self.messages.push((message.into(), color));
+    }
+
+    pub fn iter(&self) -> impl DoubleEndedIterator<Item = &(String, Color)> {
+        self.messages.iter()
+    }
+}
+
 pub struct Game {
     map: Map,
+    messages: Messages,
 }
 
 pub struct Tcod {
@@ -119,6 +143,18 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &Vec<Object>, fov_recom
         LIGHT_RED,
         DARK_RED
     );
+
+    // Display messages
+    let mut y = MSG_HEIGHT as i32;
+    for &(ref msg, color) in game.messages.iter().rev() {
+        let msg_height = tcod.panel.get_height_rect(MSG_X, y, MSG_WIDTH, 0, msg);
+        y -= msg_height;
+        if y < 0 {
+            break;
+        }
+        tcod.panel.set_default_foreground(color);
+        tcod.panel.print_rect(MSG_X, y, MSG_WIDTH, 0, msg);
+    }
 
     // Blit panel to root
     blit(
@@ -234,7 +270,11 @@ fn main() {
 
     let mut game = Game {
         map: map::make_map(&mut objects),
+        messages: Messages::new(),
     };
+
+    // Welcome player
+    game.messages.add("Welcome traveller! Prepare to die!", RED);
 
     // Populate FOV map
     for x in 0..map::MAP_WIDTH {
