@@ -208,7 +208,7 @@ pub fn move_by(id: usize, dx: i32, dy: i32, map: &Map, objects: &mut Vec<Object>
     }
 }
 
-pub fn player_move_or_attack(dx: i32, dy: i32, game: &Game, objects: &mut Vec<Object>) {
+pub fn player_move_or_attack(dx: i32, dy: i32, game: &mut Game, objects: &mut Vec<Object>) {
     let x = objects[PLAYER].x + dx;
     let y = objects[PLAYER].y + dy;
 
@@ -217,7 +217,7 @@ pub fn player_move_or_attack(dx: i32, dy: i32, game: &Game, objects: &mut Vec<Ob
     match target_id {
         Some(target_id) => {
             let (player, target) = mut_two(PLAYER, target_id, objects);
-            player.attack(target);
+            player.attack(target, game);
         }
 
         None => {

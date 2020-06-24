@@ -199,7 +199,7 @@ fn render_bar(
 
 
 
-fn handle_keys(tcod: &mut Tcod, game: &Game, objects: &mut Vec<Object>) -> PlayerAction {
+fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> PlayerAction {
     use tcod::input::Key;
     use tcod::input::KeyCode::*;
     
@@ -305,7 +305,7 @@ fn main() {
 
         let player = &mut objects[PLAYER];
         previous_player_position = (player.x, player.y);
-        let player_action = handle_keys(&mut tcod, &game, &mut objects);
+        let player_action = handle_keys(&mut tcod, &mut game, &mut objects);
         if player_action == PlayerAction::Exit {
             break;
         }
@@ -313,7 +313,7 @@ fn main() {
         if objects[PLAYER].alive && player_action != PlayerAction::DidntTakeTurn {
             for id in 0..objects.len() {
                 if objects[id].ai.is_some() {
-                    ai::ai_take_turn(id, &tcod, &game, &mut objects);
+                    ai::ai_take_turn(id, &tcod, &mut game, &mut objects);
                 }
             }
         }

@@ -1,6 +1,8 @@
 use tcod::colors::*;
 use tcod::console::*;
 
+use crate::Game;
+
 #[derive(Debug)]
 pub struct Object {
     pub x: i32,
@@ -49,7 +51,7 @@ impl Object {
         ((dx.pow(2) + dy.pow(2)) as f32).sqrt()
     }
 
-    pub fn take_damage(&mut self, damage: i32) {
+    pub fn take_damage(&mut self, damage: i32, game: &mut Game) {
         if let Some(fighter) = self.fighter.as_mut() {
             if damage > 0 {
                 fighter.hp -= damage;
@@ -59,24 +61,38 @@ impl Object {
         if let Some(fighter) = self.fighter {
             if fighter.hp <= 0 {
                 self.alive = false;
-                fighter.on_death.callback(self);
+                fighter.on_death.callback(self, game);
             }
         }
     }
 
-    pub fn attack(&mut self, target: &mut Object) {
+    pub fn attack(&mut self, target: &mut Object, game: &mut Game) {
         // damage = power - defense
         let damage = self.fighter.map_or(0, |f| f.power) - target.fighter.map_or(0, |f| f.defense);
         if damage > 0 {
-            println!(
-                "{} attacks {} for {} hit points.",
-                self.name, target.name, damage
+            // println!(
+            //     "{} attacks {} for {} hit points.",
+            //     self.name, target.name, damage
+            // );
+            game.messages.add(
+                format!(
+                    "{} attacks {} for {} hit points.",
+                    self.name, target.name, damage
+                ),
+                WHITE,
             );
-            target.take_damage(damage);
+            target.take_damage(damage, game);
         } else {
-            println!(
-                "{} attacks {} but it has no effect!",
-                self.name, target.name
+            // println!(
+            //     "{} attacks {} but it has no effect!",
+            //     self.name, target.name
+            // );
+            game.messages.add(
+                format!(
+                    "{} attacks {} but it has no effect!",
+                    self.name, target.name
+                ),
+                WHITE,
             );
         }
     }
@@ -99,24 +115,26 @@ pub enum DeathCallback {
 }
 
 impl DeathCallback {
-    pub fn callback(self, object: &mut Object) {
+    pub fn callback(self, object: &mut Object, game: &mut Game) {
         use DeathCallback::*;
-        let callback: fn(&mut Object) = match self {
+        let callback = match self {
             Player => player_death,
             Monster => monster_death,
         };
-        callback(object);
+        callback(object, game);
     }
 }
 
-fn player_death(player: &mut Object) {
-    println!("You died!");
+fn player_death(player: &mut Object, game: &mut Game) {
+    //println!("You died!");
+    game.messages.add("You died!", RED);
     player.char = '%';
     player.color = DARK_RED;
 }
 
-fn monster_death(monster: &mut Object) {
-    println!("{} is dead!", monster.name);
+fn monster_death(monster: &mut Object, game: &mut Game) {
+    //println!("{} is dead!", monster.name);
+    game.messages.add(format!("{} died!", monster.name), ORANGE);
     monster.char = '%';
     monster.color = DARK_RED;
     monster.blocks = false;

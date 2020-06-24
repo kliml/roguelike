@@ -18,7 +18,7 @@ pub fn move_towards(id: usize, target_x: i32, target_y: i32, map: &Map, objects:
   map::move_by(id, dx, dy, map, objects);
 }
 
-pub fn ai_take_turn(monster_id: usize, tcod: &Tcod, game: &Game, objects: &mut Vec<Object>) {
+pub fn ai_take_turn(monster_id: usize, tcod: &Tcod, game: &mut Game, objects: &mut Vec<Object>) {
   // Monster takes turn if is in fov
   let (monster_x, monster_y) = objects[monster_id].pos();
   if tcod.fov.is_in_fov(monster_x, monster_y) {
@@ -28,7 +28,7 @@ pub fn ai_take_turn(monster_id: usize, tcod: &Tcod, game: &Game, objects: &mut V
       move_towards(monster_id, player_x, player_y, &game.map, objects);
     } else {
       let (monster, player) = mut_two(monster_id, PLAYER, objects);
-      monster.attack(player);
+      monster.attack(player, game);
     }
   }
 }
