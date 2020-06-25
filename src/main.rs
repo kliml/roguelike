@@ -1,6 +1,7 @@
 use tcod::colors::*;
 use tcod::console::*;
 use tcod::map::{FovAlgorithm, Map as FovMap};
+use tcod::input::{self, Event, Key, Mouse};
 
 mod misc;
 
@@ -65,6 +66,8 @@ pub struct Tcod {
     con: Offscreen,
     panel: Offscreen,
     fov: FovMap,
+    key: Key,
+    mouse: Mouse,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -144,6 +147,16 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &Vec<Object>, fov_recom
         DARK_RED
     );
 
+    // Display object names under mouse
+    tcod.panel.set_default_foreground(LIGHT_GREY);
+    tcod.panel.print_ex(
+        1,
+        0,
+        BackgroundFlag::None,
+        TextAlignment::Left,
+        get_names_under_mouse(tcod.mouse, objects, &tcod.fov)
+    );
+
     // Display messages
     let mut y = MSG_HEIGHT as i32;
     for &(ref msg, color) in game.messages.iter().rev() {
@@ -203,9 +216,8 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
     use tcod::input::Key;
     use tcod::input::KeyCode::*;
     
-    let key = tcod.root.wait_for_keypress(true);
     let player_alive = objects[PLAYER].alive;
-    match (key, key.text(), player_alive) {
+    match (tcod.key, tcod.key.text(), player_alive) {
         (Key {
             code: Enter,
             alt: true,
@@ -238,6 +250,18 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
     }
 }
 
+fn get_names_under_mouse(mouse: Mouse, objects: &Vec<Object>, fov_map: &FovMap) -> String {
+    let (x, y) = (mouse.cx as i32, mouse.cy as i32);
+
+    let names = objects
+        .iter()
+        .filter(|obj| obj.pos() == (x, y) && fov_map.is_in_fov(obj.x, obj.y))
+        .map(|obj| obj.name.clone())
+        .collect::<Vec<_>>();
+
+    names.join(", ")
+}
+
 fn main() {
     tcod::system::set_fps(LIMIT_FPS);
     
@@ -253,6 +277,8 @@ fn main() {
         con: Offscreen::new(SCREEN_WIDTH, SCREEN_HEIGHT),
         panel: Offscreen::new(SCREEN_WIDTH, PANEL_HEIGHT),
         fov: FovMap::new(map::MAP_WIDTH, map::MAP_HEIGHT),
+        key: Default::default(),
+        mouse: Default::default(),
     };
     
     // Player
@@ -295,6 +321,12 @@ fn main() {
         
         for object in &objects {
             object.draw(&mut tcod.con);
+        }
+
+        match input::check_for_event(input::MOUSE | input::KEY_PRESS) {
+            Some((_, Event::Mouse(m))) => tcod.mouse = m,
+            Some((_, Event::Key(k))) => tcod.key = k,
+            _ => tcod.key = Default::default(),
         }
 
         // render
