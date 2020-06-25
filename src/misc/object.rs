@@ -14,6 +14,7 @@ pub struct Object {
     pub alive: bool,
     pub fighter: Option<Fighter>,
     pub ai: Option<Ai>,
+    pub item: Option<Item>,
 }
 
 impl Object {
@@ -28,6 +29,7 @@ impl Object {
             alive: false,
             fighter: None,
             ai: None,
+            item: None,
         }
     }
 
@@ -146,4 +148,26 @@ fn monster_death(monster: &mut Object, game: &mut Game) {
 #[derive(Clone, Debug, PartialEq)]
 pub enum Ai {
     Basic,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum Item {
+    Heal,
+}
+
+pub const INVENTORY_SIZE: usize = 26;
+
+pub fn pick_item_up (object_id: usize, game: &mut Game, objects: &mut Vec<Object>) {
+    if game.inventory.len() >= INVENTORY_SIZE {
+        game.messages.add(
+            format!("Your inventory is full, connot pick up {}.",
+            objects[object_id].name
+        ),
+        RED,
+        );
+    } else {
+        let item = objects.swap_remove(object_id);
+        game.messages.add(format!("You picked up a {}!", item.name), GREEN);
+        game.inventory.push(item);
+    }
 }

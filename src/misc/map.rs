@@ -10,6 +10,7 @@ use tcod::colors::*;
 use crate::*;
 use crate::misc::help::mut_two;
 use crate::misc::object::DeathCallback;
+use crate::misc::object::Item;
 
 pub const MAP_WIDTH: i32 = 80;
 pub const MAP_HEIGHT: i32 = 43;
@@ -21,6 +22,9 @@ pub const COLOR_LIGHT_GROUND: Color = Color { r: 200, g: 180, b: 50};
 
 // Monster limit
 const MAX_ROOM_MONSTERS: i32 = 3;
+
+// Items limit
+const MAX_ROOM_ITEMS: i32 = 2;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Tile {
@@ -186,6 +190,19 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
                 troll
             };
             objects.push(monster);
+        }
+    }
+
+    let num_items = rand::thread_rng().gen_range(0, MAX_ROOM_ITEMS + 1);
+
+    for _ in 0..num_items {
+        let x = rand::thread_rng().gen_range(room.x1 + 1, room.x2);
+        let y = rand::thread_rng().gen_range(room.y1 + 1, room.y2);
+
+        if !is_blocked(x, y, map, objects) {
+            let mut object =  Object::new(x, y, '!', VIOLET, "healing potion", false);
+            object.item = Some(Item::Heal);
+            objects.push(object);
         }
     }
 }

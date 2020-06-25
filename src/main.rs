@@ -12,6 +12,7 @@ use misc::object::Object;
 use misc::object::Fighter;
 use misc::object::Ai;
 use misc::object::DeathCallback;
+use misc::object::pick_item_up;
 
 // Window size
 const SCREEN_WIDTH: i32 = 80;
@@ -59,6 +60,7 @@ impl Messages {
 pub struct Game {
     map: Map,
     messages: Messages,
+    inventory: Vec<Object>,
 }
 
 pub struct Tcod {
@@ -229,21 +231,30 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
         }
 
         (Key { code: Escape, .. }, _, _) => Exit,
-        (Key { code: Up, .. }, _, _) => {
+        (Key { code: Up, .. }, _, true) => {
             map::player_move_or_attack(0, -1, game, objects);
             TookTurn
         }
-        (Key { code: Down, .. }, _, _) => {
+        (Key { code: Down, .. }, _, true) => {
             map::player_move_or_attack(0, 1, game, objects);
             TookTurn
         }
-        (Key { code: Left, .. }, _, _) => {
+        (Key { code: Left, .. }, _, true) => {
             map::player_move_or_attack(-1, 0, game, objects);
             TookTurn
         }
-        (Key { code: Right, .. }, _, _) => {
+        (Key { code: Right, .. }, _, true) => {
             map::player_move_or_attack(1, 0, game, objects);
             TookTurn
+        }
+        (Key { code: Text, .. }, "g", true) => {
+            let item_id = objects
+                .iter()
+                .position(|obj| obj.pos() == objects[PLAYER].pos() && obj.item.is_some());
+            if let Some(item_id) = item_id {
+                pick_item_up(item_id, game, objects);
+            }
+            DidntTakeTurn
         }
 
         _ => DidntTakeTurn,
@@ -297,6 +308,7 @@ fn main() {
     let mut game = Game {
         map: map::make_map(&mut objects),
         messages: Messages::new(),
+        inventory: vec![],
     };
 
     // Welcome player
