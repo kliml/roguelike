@@ -1,18 +1,18 @@
 use tcod::colors::*;
 use tcod::console::*;
-use tcod::map::{FovAlgorithm, Map as FovMap};
 use tcod::input::{self, Event, Key, Mouse};
+use tcod::map::{FovAlgorithm, Map as FovMap};
 
 mod misc;
 
 use misc::ai;
 use misc::map;
 use misc::map::Map;
-use misc::object::Object;
-use misc::object::Fighter;
+use misc::object::pick_item_up;
 use misc::object::Ai;
 use misc::object::DeathCallback;
-use misc::object::pick_item_up;
+use misc::object::Fighter;
+use misc::object::Object;
 
 // Window size
 const SCREEN_WIDTH: i32 = 80;
@@ -87,9 +87,10 @@ use PlayerAction::*;
 fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &Vec<Object>, fov_recompute: bool) {
     if fov_recompute {
         let player = &objects[PLAYER];
-        tcod.fov.compute_fov(player.x, player.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO);
+        tcod.fov
+            .compute_fov(player.x, player.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO);
     }
-    
+
     for x in 0..map::MAP_WIDTH {
         for y in 0..map::MAP_HEIGHT {
             let visible = tcod.fov.is_in_fov(x, y);
@@ -107,22 +108,23 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &Vec<Object>, fov_recom
                 *explored = true;
             }
             if *explored {
-                tcod.con.set_char_background(x, y, color, BackgroundFlag::Set);
+                tcod.con
+                    .set_char_background(x, y, color, BackgroundFlag::Set);
             }
         }
     }
-    
+
     let mut to_draw: Vec<_> = objects
-    .iter()
-    .filter(|o| tcod.fov.is_in_fov(o.x, o.y))
-    .collect();
+        .iter()
+        .filter(|o| tcod.fov.is_in_fov(o.x, o.y))
+        .collect();
     to_draw.sort_by(|o1, o2| o1.blocks.cmp(&o2.blocks));
     for object in &to_draw {
         if tcod.fov.is_in_fov(object.x, object.y) {
             object.draw(&mut tcod.con);
         }
     }
-    
+
     blit(
         &tcod.con,
         (0, 0),
@@ -149,7 +151,7 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &Vec<Object>, fov_recom
         hp,
         max_hp,
         LIGHT_RED,
-        DARK_RED
+        DARK_RED,
     );
 
     // Display object names under mouse
@@ -159,7 +161,7 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &Vec<Object>, fov_recom
         0,
         BackgroundFlag::None,
         TextAlignment::Left,
-        get_names_under_mouse(tcod.mouse, objects, &tcod.fov)
+        get_names_under_mouse(tcod.mouse, objects, &tcod.fov),
     );
 
     // Display messages
@@ -184,7 +186,6 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &Vec<Object>, fov_recom
         1.0,
         1.0,
     )
-    
 }
 
 fn render_bar(
@@ -215,19 +216,21 @@ fn render_bar(
     );
 }
 
-
-
 fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> PlayerAction {
     use tcod::input::Key;
     use tcod::input::KeyCode::*;
-    
+
     let player_alive = objects[PLAYER].alive;
     match (tcod.key, tcod.key.text(), player_alive) {
-        (Key {
-            code: Enter,
-            alt: true,
-            ..
-        }, _, _) => {
+        (
+            Key {
+                code: Enter,
+                alt: true,
+                ..
+            },
+            _,
+            _,
+        ) => {
             let fullscreen = tcod.root.is_fullscreen();
             tcod.root.set_fullscreen(!fullscreen);
             DidntTakeTurn
@@ -259,11 +262,11 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
             }
             DidntTakeTurn
         }
-        (Key { code: Text, ..}, "i", true) => {
+        (Key { code: Text, .. }, "i", true) => {
             let inventory_index = inventory_menu(
-                &game.inventory, 
+                &game.inventory,
                 "Press the key next to an item to use it, or any other to cancel.\n",
-                &mut tcod.root
+                &mut tcod.root,
             );
             if let Some(inventory_index) = inventory_index {
                 use_item(inventory_index, tcod, game, objects);
@@ -288,7 +291,12 @@ fn get_names_under_mouse(mouse: Mouse, objects: &Vec<Object>, fov_map: &FovMap) 
     names.join(", ")
 }
 
-pub fn menu<T: AsRef<str>>(header: &str, options: &Vec<T>, width: i32, root: &mut Root) -> Option<usize> {
+pub fn menu<T: AsRef<str>>(
+    header: &str,
+    options: &Vec<T>,
+    width: i32,
+    root: &mut Root,
+) -> Option<usize> {
     assert!(
         options.len() <= 26,
         "Connot have a menu with more than 26 options."
@@ -297,8 +305,8 @@ pub fn menu<T: AsRef<str>>(header: &str, options: &Vec<T>, width: i32, root: &mu
     // Calculate total height for the header and one line per option
     let header_height = root.get_height_rect(0, 0, width, SCREEN_HEIGHT, header);
     let height = options.len() as i32 + header_height;
-    
-    // Window menu    
+
+    // Window menu
     let mut window = Offscreen::new(width, height);
     window.set_default_foreground(WHITE);
     window.print_rect_ex(
@@ -324,7 +332,7 @@ pub fn menu<T: AsRef<str>>(header: &str, options: &Vec<T>, width: i32, root: &mu
     }
 
     let x = SCREEN_WIDTH / 2 - width / 2;
-    let y = SCREEN_HEIGHT /2 - height / 2;
+    let y = SCREEN_HEIGHT / 2 - height / 2;
     blit(&window, (0, 0), (width, height), root, (x, y), 1.0, 0.7);
 
     root.flush();
@@ -387,13 +395,19 @@ pub fn use_item(inventory_id: usize, tcod: &mut Tcod, game: &mut Game, objects: 
 }
 
 const HEAL_AMOUNT: i32 = 4;
-pub fn cast_heal(inventory_id: usize, tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> UseResult {
+pub fn cast_heal(
+    inventory_id: usize,
+    tcod: &mut Tcod,
+    game: &mut Game,
+    objects: &mut Vec<Object>,
+) -> UseResult {
     if let Some(fighter) = objects[PLAYER].fighter {
         if fighter.hp == fighter.max_hp {
             game.messages.add("You are already at full health.", RED);
             return UseResult::Cancelled;
         }
-        game.messages.add("Your wounds start to feel better!", LIGHT_VIOLET);
+        game.messages
+            .add("Your wounds start to feel better!", LIGHT_VIOLET);
         objects[PLAYER].heal(HEAL_AMOUNT);
         return UseResult::UsedUp;
     }
@@ -402,14 +416,14 @@ pub fn cast_heal(inventory_id: usize, tcod: &mut Tcod, game: &mut Game, objects:
 
 fn main() {
     tcod::system::set_fps(LIMIT_FPS);
-    
+
     let root = Root::initializer()
         .font("res/arial10x10.png", FontLayout::Tcod)
         .font_type(FontType::Greyscale)
         .size(SCREEN_WIDTH, SCREEN_HEIGHT)
         .title("roguelike")
         .init();
-    
+
     let mut tcod = Tcod {
         root,
         con: Offscreen::new(SCREEN_WIDTH, SCREEN_HEIGHT),
@@ -418,7 +432,7 @@ fn main() {
         key: Default::default(),
         mouse: Default::default(),
     };
-    
+
     // Player
     let mut player = Object::new(0, 0, '@', WHITE, "player", false);
     player.alive = true;
@@ -429,7 +443,7 @@ fn main() {
         power: 5,
         on_death: DeathCallback::Player,
     });
-    
+
     let mut objects = vec![player];
 
     let mut game = Game {
@@ -454,10 +468,10 @@ fn main() {
     }
 
     let mut previous_player_position = (-1, -1);
-    
+
     while !tcod.root.window_closed() {
         tcod.con.clear();
-        
+
         for object in &objects {
             object.draw(&mut tcod.con);
         }

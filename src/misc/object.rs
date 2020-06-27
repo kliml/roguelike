@@ -115,7 +115,7 @@ pub struct Fighter {
     pub max_hp: i32,
     pub hp: i32,
     pub defense: i32,
-    pub power:i32,
+    pub power: i32,
     pub on_death: DeathCallback,
 }
 
@@ -166,17 +166,19 @@ pub enum Item {
 
 pub const INVENTORY_SIZE: usize = 26;
 
-pub fn pick_item_up (object_id: usize, game: &mut Game, objects: &mut Vec<Object>) {
+pub fn pick_item_up(object_id: usize, game: &mut Game, objects: &mut Vec<Object>) {
     if game.inventory.len() >= INVENTORY_SIZE {
         game.messages.add(
-            format!("Your inventory is full, connot pick up {}.",
-            objects[object_id].name
-        ),
-        RED,
+            format!(
+                "Your inventory is full, connot pick up {}.",
+                objects[object_id].name
+            ),
+            RED,
         );
     } else {
         let item = objects.swap_remove(object_id);
-        game.messages.add(format!("You picked up a {}!", item.name), GREEN);
+        game.messages
+            .add(format!("You picked up a {}!", item.name), GREEN);
         game.inventory.push(item);
     }
 }
