@@ -260,12 +260,16 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
             DidntTakeTurn
         }
         (Key { code: Text, ..}, "i", true) => {
-            inventory_menu(
+            let inventory_index = inventory_menu(
                 &game.inventory, 
                 "Press the key next to an item to use it, or any other to cancel.\n",
                 &mut tcod.root
             );
-            TookTurn
+            if let Some(inventory_index) = inventory_index {
+                use_item(inventory_index, tcod, game, objects);
+            }
+            // maybe TookTurn
+            DidntTakeTurn
         }
 
         _ => DidntTakeTurn,
@@ -352,6 +356,48 @@ pub fn inventory_menu(inventory: &Vec<Object>, header: &str, root: &mut Root) ->
     } else {
         None
     }
+}
+
+pub enum UseResult {
+    UsedUp,
+    Cancelled,
+}
+
+pub fn use_item(inventory_id: usize, tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
+    use misc::object::Item::*;
+
+    if let Some(item) = game.inventory[inventory_id].item {
+        let on_use = match item {
+            Heal => cast_heal,
+        };
+        match on_use(inventory_id, tcod, game, objects) {
+            UseResult::UsedUp => {
+                game.inventory.remove(inventory_id);
+            }
+            UseResult::Cancelled => {
+                game.messages.add("Cancelled", WHITE);
+            }
+        }
+    } else {
+        game.messages.add(
+            format!("The {} cannot be used.", game.inventory[inventory_id].name),
+            WHITE,
+        );
+    }
+}
+
+const HEAL_AMOUNT: i32 = 4;
+pub fn cast_heal(inventory_id: usize, tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> UseResult {
+    if let Some(fighter) = objects[PLAYER].fighter {
+        if fighter.hp == fighter.max_hp {
+            game.messages.add("You are already at full health.", RED);
+            return UseResult::Cancelled;
+        }
+        game.messages.add("Your wounds start to feel better!", LIGHT_VIOLET);
+        objects[PLAYER].heal(HEAL_AMOUNT);
+        return UseResult::UsedUp;
+    }
+    UseResult::Cancelled
 }
 
 fn main() {
