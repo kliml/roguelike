@@ -498,10 +498,6 @@ fn main() {
     while !tcod.root.window_closed() {
         tcod.con.clear();
 
-        for object in &objects {
-            object.draw(&mut tcod.con);
-        }
-
         match input::check_for_event(input::MOUSE | input::KEY_PRESS) {
             Some((_, Event::Mouse(m))) => tcod.mouse = m,
             Some((_, Event::Key(k))) => tcod.key = k,
