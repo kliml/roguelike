@@ -162,6 +162,7 @@ pub enum Ai {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Item {
     Heal,
+    Lightning,
 }
 
 pub const INVENTORY_SIZE: usize = 26;
