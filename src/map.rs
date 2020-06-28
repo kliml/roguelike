@@ -7,9 +7,9 @@ use tcod::colors::*;
 // use crate::Game;
 // use crate::Fighter;
 // use crate::Ai;
-use crate::misc::help::mut_two;
-use crate::misc::object::DeathCallback;
-use crate::misc::object::Item;
+use crate::help::mut_two;
+use crate::object::DeathCallback;
+use crate::object::Item;
 use crate::*;
 
 pub const MAP_WIDTH: i32 = 80;

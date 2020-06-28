@@ -3,17 +3,18 @@ use tcod::console::*;
 use tcod::input::{self, Event, Key, Mouse};
 use tcod::map::{FovAlgorithm, Map as FovMap};
 
-mod misc;
+mod ai;
+mod help;
+mod map;
+mod object;
 
-use misc::ai;
-use misc::help::closest_monster;
-use misc::map;
-use misc::map::Map;
-use misc::object::pick_item_up;
-use misc::object::Ai;
-use misc::object::DeathCallback;
-use misc::object::Fighter;
-use misc::object::Object;
+use help::closest_monster;
+use map::Map;
+use object::pick_item_up;
+use object::Ai;
+use object::DeathCallback;
+use object::Fighter;
+use object::Object;
 
 // Window size
 const SCREEN_WIDTH: i32 = 80;
@@ -371,7 +372,7 @@ pub enum UseResult {
 }
 
 pub fn use_item(inventory_id: usize, tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
-    use misc::object::Item::*;
+    use object::Item::*;
 
     if let Some(item) = game.inventory[inventory_id].item {
         let on_use = match item {

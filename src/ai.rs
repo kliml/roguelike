@@ -4,8 +4,14 @@
 // use crate::Game;
 // use crate::PLAYER;
 
-use crate::misc::help::mut_two;
-use crate::*;
+use crate::help::mut_two;
+use crate::map;
+use crate::Ai;
+use crate::Game;
+use crate::Map;
+use crate::Object;
+use crate::Tcod;
+use crate::PLAYER;
 
 pub fn move_towards(id: usize, target_x: i32, target_y: i32, map: &Map, objects: &mut Vec<Object>) {
     // Vector from object to targer

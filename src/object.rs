@@ -157,6 +157,10 @@ fn monster_death(monster: &mut Object, game: &mut Game) {
 #[derive(Clone, Debug, PartialEq)]
 pub enum Ai {
     Basic,
+    Confused {
+        previous_ai: Box<Ai>,
+        num_turns: i32,
+    },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
