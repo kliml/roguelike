@@ -153,6 +153,20 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &Vec<Object>, fov_recom
         LIGHT_RED,
         DARK_RED,
     );
+    let mana = objects[PLAYER].fighter.map_or(0, |f| f.mana);
+    let max_mana = objects[PLAYER].fighter.map_or(0, |f| f.max_mana);
+    render_bar(
+        &mut tcod.panel,
+        1,
+        2,
+        BAR_WIDTH,
+        "MP",
+        mana,
+        max_mana,
+        LIGHT_BLUE,
+        DARK_BLUE,
+    );
+
 
     // Display object names under mouse
     tcod.panel.set_default_foreground(LIGHT_GREY);
@@ -466,6 +480,8 @@ fn main() {
     player.fighter = Some(Fighter {
         max_hp: 30,
         hp: 30,
+        max_mana: 30,
+        mana: 30,
         defense: 2,
         power: 5,
         on_death: DeathCallback::Player,

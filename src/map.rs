@@ -183,6 +183,8 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
                 ork.fighter = Some(Fighter {
                     max_hp: 10,
                     hp: 10,
+                    max_mana: 0,
+                    mana: 0,
                     defense: 0,
                     power: 3,
                     on_death: DeathCallback::Monster,
@@ -195,6 +197,8 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
                 troll.fighter = Some(Fighter {
                     max_hp: 16,
                     hp: 16,
+                    max_mana: 0,
+                    mana: 0,
                     defense: 1,
                     power: 4,
                     on_death: DeathCallback::Monster,
