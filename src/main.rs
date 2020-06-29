@@ -18,6 +18,7 @@ use object::DeathCallback;
 use object::Fighter;
 use object::Object;
 
+use game::messages::*;
 use game::*;
 
 // Window size
@@ -47,24 +48,6 @@ pub const PLAYER: usize = 0;
 const FOV_ALGO: FovAlgorithm = FovAlgorithm::Basic;
 const FOV_LIGHT_WALLS: bool = true;
 const TORCH_RADIUS: i32 = 10;
-
-pub struct Messages {
-    messages: Vec<(String, Color)>,
-}
-
-impl Messages {
-    pub fn new() -> Self {
-        Self { messages: vec![] }
-    }
-
-    pub fn add<T: Into<String>>(&mut self, message: T, color: Color) {
-        self.messages.push((message.into(), color));
-    }
-
-    pub fn iter(&self) -> impl DoubleEndedIterator<Item = &(String, Color)> {
-        self.messages.iter()
-    }
-}
 
 pub struct Game {
     map: Map,
@@ -289,6 +272,21 @@ fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> P
                 use_item(inventory_index, tcod, game, objects);
             }
             // maybe TookTurn
+            DidntTakeTurn
+        }
+        (Key { code: Text, .. }, "s", true) => {
+            let spell_id = menu::spell_menu(&mut tcod.root);
+            if let Some(spell_id) = spell_id {
+                use object::spells::*;
+                let spell = match spell_id {
+                    0 => Spells::Heal,
+                    1 => Spells::Lightning,
+                    2 => Spells::Freeze,
+                    _ => return DidntTakeTurn,
+                };
+                cast_spell(spell, tcod, game, objects);
+                return TookTurn;
+            }
             DidntTakeTurn
         }
 

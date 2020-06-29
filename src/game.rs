@@ -1,4 +1,5 @@
 pub mod menu;
+pub mod messages;
 
 use tcod::colors::*;
 use tcod::console::*;
@@ -9,7 +10,6 @@ use crate::map;
 use crate::object;
 use crate::settings::*;
 use crate::Game;
-use crate::Messages;
 use crate::Tcod;
 
 use crate::handle_keys;
@@ -20,6 +20,8 @@ use map::Map;
 use object::DeathCallback;
 use object::Fighter;
 use object::Object;
+
+use messages::*;
 
 pub fn new_game(tcod: &mut Tcod) -> (Game, Vec<Object>) {
     // Create player

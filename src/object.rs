@@ -1,3 +1,5 @@
+pub mod spells;
+
 use tcod::colors::*;
 use tcod::console::*;
 
@@ -15,6 +17,7 @@ pub struct Object {
     pub fighter: Option<Fighter>,
     pub ai: Option<Ai>,
     pub item: Option<Item>,
+    pub effect: Option<StatusEffect>,
 }
 
 impl Object {
@@ -30,6 +33,7 @@ impl Object {
             fighter: None,
             ai: None,
             item: None,
+            effect: None,
         }
     }
 
@@ -139,7 +143,6 @@ impl DeathCallback {
 }
 
 fn player_death(player: &mut Object, game: &mut Game) {
-    //println!("You died!");
     game.messages.add("You died!", RED);
     player.char = '%';
     player.color = DARK_RED;
@@ -159,10 +162,6 @@ fn monster_death(monster: &mut Object, game: &mut Game) {
 #[derive(Clone, Debug, PartialEq)]
 pub enum Ai {
     Basic,
-    Confused {
-        previous_ai: Box<Ai>,
-        num_turns: i32,
-    },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -188,4 +187,15 @@ pub fn pick_item_up(object_id: usize, game: &mut Game, objects: &mut Vec<Object>
             .add(format!("You picked up a {}!", item.name), GREEN);
         game.inventory.push(item);
     }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Effect {
+    Frozen,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct StatusEffect {
+    pub effect: Effect,
+    pub turns_left: i32,
 }

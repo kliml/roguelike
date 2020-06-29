@@ -93,20 +93,19 @@ pub fn main_menu(tcod: &mut Tcod) {
             "By kliml",
         );
 
-
         let choices = vec!["Play a new game", "Continue last game", "Exit"];
         let choice = menu("", &choices, 24, &mut tcod.root);
 
         match choice {
-        Some(0) => {
-            let (mut game, mut objects) = new_game(tcod);
-            play_game(tcod, &mut game, &mut objects);
-        }
-        Some(2) => {
-            // Exit
-            break;
-        }
-        _ => {}
+            Some(0) => {
+                let (mut game, mut objects) = new_game(tcod);
+                play_game(tcod, &mut game, &mut objects);
+            }
+            Some(2) => {
+                // Exit
+                break;
+            }
+            _ => {}
         }
     }
 }
@@ -125,4 +124,13 @@ pub fn inventory_menu(inventory: &Vec<Object>, header: &str, root: &mut Root) ->
     } else {
         None
     }
+}
+
+pub fn spell_menu(root: &mut Root) -> Option<usize> {
+    let header = "Choose your spell!";
+    let options = vec!["Heal", "Lightning", "Freeze"];
+
+    let spell_id = menu(header, &options, INVENTORY_WIDTH, root);
+
+    spell_id
 }

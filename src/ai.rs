@@ -1,17 +1,14 @@
-// use crate::Map;
-// use crate::Object;
-// use crate::Tcod;
-// use crate::Game;
-// use crate::PLAYER;
+use tcod::colors::*;
 
 use crate::help::mut_two;
 use crate::map;
-use crate::Ai;
 use crate::Game;
 use crate::Map;
 use crate::Object;
 use crate::Tcod;
 use crate::PLAYER;
+
+use crate::object::Effect;
 
 pub fn move_towards(id: usize, target_x: i32, target_y: i32, map: &Map, objects: &mut Vec<Object>) {
     // Vector from object to targer
@@ -28,6 +25,23 @@ pub fn ai_take_turn(monster_id: usize, tcod: &Tcod, game: &mut Game, objects: &m
     // Monster takes turn if is in fov
     let (monster_x, monster_y) = objects[monster_id].pos();
     if tcod.fov.is_in_fov(monster_x, monster_y) {
+        // Check for status effect
+        if let Some(mut effect) = objects[monster_id].effect {
+            match (effect.effect, effect.turns_left) {
+                (Effect::Frozen, 0) => {
+                    objects[monster_id].color = DARK_ORANGE;
+                    objects[monster_id].effect = None;
+                    return;
+                }
+                (Effect::Frozen, _) => {
+                    objects[monster_id].color = LIGHT_BLUE;
+                    effect.turns_left -= 1;
+                    objects[monster_id].effect = Some(effect);
+                    return;
+                }
+            }
+        }
+
         // Move or attack depending on distance
         if objects[monster_id].distance_to(&objects[PLAYER]) >= 2.0 {
             let (player_x, player_y) = objects[PLAYER].pos();
