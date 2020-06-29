@@ -1,3 +1,5 @@
+pub mod menu;
+
 use tcod::colors::*;
 use tcod::console::*;
 use tcod::input::{self, Event, Key, Mouse};
@@ -5,11 +7,14 @@ use tcod::input::{self, Event, Key, Mouse};
 use crate::ai;
 use crate::map;
 use crate::object;
+use crate::settings::*;
 use crate::Game;
 use crate::Messages;
 use crate::Tcod;
-use crate::PLAYER;
-use crate::*;
+
+use crate::handle_keys;
+use crate::render_all;
+use crate::PlayerAction;
 
 use map::Map;
 use object::DeathCallback;
