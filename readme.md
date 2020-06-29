@@ -2,7 +2,8 @@
 
 ## TODO
 * move inventory logic to separate file
-* move menu system to help
+* move menu system to separate file
+* move constats to sepate file
 * setup section
 
 ## Controls
