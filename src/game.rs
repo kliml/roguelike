@@ -1,15 +1,20 @@
 pub mod menu;
 pub mod messages;
 
+use std::error::Error;
+use std::fs::File;
+use std::io::{Read, Write};
 use tcod::colors::*;
 use tcod::console::*;
 use tcod::input::{self, Event, Key, Mouse};
+
+use serde::{Deserialize, Serialize};
 
 use crate::ai;
 use crate::map;
 use crate::object;
 use crate::settings::*;
-use crate::Game;
+//use crate::Game;
 use crate::Tcod;
 
 use crate::handle_keys;
@@ -22,6 +27,13 @@ use object::Fighter;
 use object::Object;
 
 use messages::*;
+
+#[derive(Serialize, Deserialize)]
+pub struct Game {
+    pub map: Map,
+    pub messages: Messages,
+    pub inventory: Vec<Object>,
+}
 
 pub fn new_game(tcod: &mut Tcod) -> (Game, Vec<Object>) {
     // Create player
@@ -53,7 +65,7 @@ pub fn new_game(tcod: &mut Tcod) -> (Game, Vec<Object>) {
     (game, objects)
 }
 
-fn initialise_fov(tcod: &mut Tcod, map: &Map) {
+pub fn initialise_fov(tcod: &mut Tcod, map: &Map) {
     for x in 0..map::MAP_WIDTH {
         for y in 0..map::MAP_HEIGHT {
             tcod.fov.set(
@@ -86,6 +98,7 @@ pub fn play_game(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
         previous_player_position = objects[PLAYER].pos();
         let player_action = handle_keys(tcod, game, objects);
         if player_action == PlayerAction::Exit {
+            save_game(game, objects).unwrap();
             break;
         }
 
@@ -97,4 +110,19 @@ pub fn play_game(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
             }
         }
     }
+}
+
+fn save_game(game: &Game, objects: &Vec<Object>) -> Result<(), Box<dyn Error>> {
+    let save_data = serde_json::to_string(&(game, objects))?;
+    let mut file = File::create("savegame")?;
+    file.write_all(save_data.as_bytes())?;
+    Ok(())
+}
+
+pub fn load_game() -> Result<(Game, Vec<Object>), Box<dyn Error>> {
+    let mut json_save_state = String::new();
+    let mut file = File::open("savegame")?;
+    file.read_to_string(&mut json_save_state)?;
+    let result = serde_json::from_str::<(Game, Vec<Object>)>(&json_save_state)?;
+    Ok(result)
 }

@@ -69,6 +69,11 @@ pub fn menu<T: AsRef<str>>(
     }
 }
 
+fn msgbox(text: &str, width: i32, root: &mut Root) {
+    let options: &Vec<&str> = &vec![];
+    menu(text, options, width, root);
+}
+
 pub fn main_menu(tcod: &mut Tcod) {
     let img = tcod::image::Image::from_file("res/menu_background.png")
         .ok()
@@ -101,6 +106,16 @@ pub fn main_menu(tcod: &mut Tcod) {
                 let (mut game, mut objects) = new_game(tcod);
                 play_game(tcod, &mut game, &mut objects);
             }
+            Some(1) => match load_game() {
+                Ok((mut game, mut objects)) => {
+                    initialise_fov(tcod, &game.map);
+                    play_game(tcod, &mut game, &mut objects);
+                }
+                Err(_e) => {
+                    msgbox("\nNo saved game to load.\n", 24, &mut tcod.root);
+                    continue;
+                }
+            },
             Some(2) => {
                 // Exit
                 break;

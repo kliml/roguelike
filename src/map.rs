@@ -2,6 +2,8 @@ use rand::Rng;
 use std::cmp;
 use tcod::colors::*;
 
+use serde::{Deserialize, Serialize};
+
 // use crate::Object;
 // use crate::PLAYER;
 // use crate::Game;
@@ -38,7 +40,7 @@ const MAX_ROOM_MONSTERS: i32 = 3;
 // Items limit
 const MAX_ROOM_ITEMS: i32 = 2;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct Tile {
     pub blocked: bool,
     pub explored: bool,

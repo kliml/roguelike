@@ -3,6 +3,8 @@ use tcod::console::*;
 use tcod::input::{self, Event, Key, Mouse};
 use tcod::map::{FovAlgorithm, Map as FovMap};
 
+use serde::{Deserialize, Serialize};
+
 mod ai;
 mod game;
 mod help;
@@ -18,7 +20,6 @@ use object::DeathCallback;
 use object::Fighter;
 use object::Object;
 
-use game::messages::*;
 use game::*;
 
 // Window size
@@ -48,12 +49,6 @@ pub const PLAYER: usize = 0;
 const FOV_ALGO: FovAlgorithm = FovAlgorithm::Basic;
 const FOV_LIGHT_WALLS: bool = true;
 const TORCH_RADIUS: i32 = 10;
-
-pub struct Game {
-    map: Map,
-    messages: Messages,
-    inventory: Vec<Object>,
-}
 
 pub struct Tcod {
     root: Root,

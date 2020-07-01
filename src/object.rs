@@ -3,9 +3,11 @@ pub mod spells;
 use tcod::colors::*;
 use tcod::console::*;
 
+use serde::{Deserialize, Serialize};
+
 use crate::Game;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Object {
     pub x: i32,
     pub y: i32,
@@ -114,7 +116,7 @@ impl Object {
 }
 
 // Combat related
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Fighter {
     pub max_hp: i32,
     pub hp: i32,
@@ -125,7 +127,7 @@ pub struct Fighter {
     pub on_death: DeathCallback,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum DeathCallback {
     Player,
     Monster,
@@ -159,12 +161,12 @@ fn monster_death(monster: &mut Object, game: &mut Game) {
     monster.name = format!("remains of {}", monster.name);
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Ai {
     Basic,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Item {
     Heal,
     Lightning,
@@ -189,12 +191,12 @@ pub fn pick_item_up(object_id: usize, game: &mut Game, objects: &mut Vec<Object>
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Effect {
     Frozen,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StatusEffect {
     pub effect: Effect,
     pub turns_left: i32,
