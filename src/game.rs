@@ -17,10 +17,11 @@ use crate::settings::*;
 //use crate::Game;
 use crate::Tcod;
 
-use crate::handle_keys;
+use crate::engine::handle_keys;
 use crate::render_all;
 use crate::PlayerAction;
 
+use map::make_map;
 use map::Map;
 use object::DeathCallback;
 use object::Fighter;
@@ -33,6 +34,7 @@ pub struct Game {
     pub map: Map,
     pub messages: Messages,
     pub inventory: Vec<Object>,
+    pub dungeon_level: u32,
 }
 
 pub fn new_game(tcod: &mut Tcod) -> (Game, Vec<Object>) {
@@ -55,6 +57,7 @@ pub fn new_game(tcod: &mut Tcod) -> (Game, Vec<Object>) {
         map: map::make_map(&mut objects),
         messages: Messages::new(),
         inventory: vec![],
+        dungeon_level: 1,
     };
 
     initialise_fov(tcod, &game.map);
@@ -98,7 +101,9 @@ pub fn play_game(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
         previous_player_position = objects[PLAYER].pos();
         let player_action = handle_keys(tcod, game, objects);
         if player_action == PlayerAction::Exit {
-            save_game(game, objects).unwrap();
+            if objects[PLAYER].alive {
+                save_game(game, objects).unwrap();
+            }
             break;
         }
 
@@ -125,4 +130,24 @@ pub fn load_game() -> Result<(Game, Vec<Object>), Box<dyn Error>> {
     file.read_to_string(&mut json_save_state)?;
     let result = serde_json::from_str::<(Game, Vec<Object>)>(&json_save_state)?;
     Ok(result)
+}
+
+pub fn next_level(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
+    game.messages
+        .add("You take a moment to rest and recover.", VIOLET);
+
+    let heal_hp = objects[PLAYER].fighter.map_or(0, |f| f.max_hp / 2);
+    objects[PLAYER].heal(heal_hp);
+    let recover_mana = objects[PLAYER].fighter.map_or(0, |f| f.max_mana / 2);
+    objects[PLAYER].recover_mana(recover_mana);
+
+    game.messages.add(
+        "After a rare moment of peace, you descend deeper into \
+         the heart of the dungeon...",
+        RED,
+    );
+
+    game.dungeon_level += 1;
+    game.map = make_map(objects);
+    initialise_fov(tcod, &game.map);
 }

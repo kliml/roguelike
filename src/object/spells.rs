@@ -107,16 +107,15 @@ fn cast_freeze(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> U
     UseResult::Cancelled
 }
 
-pub fn cast_spell(spell: Spells, tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
-    let on_use = match spell {
-        Spells::Heal => {
-            cast_heal(tcod, game, objects);
-        }
-        Spells::Lightning => {
-            cast_lightning(tcod, game, objects);
-        }
-        Spells::Freeze => {
-            cast_freeze(tcod, game, objects);
-        }
-    };
+pub fn cast_spell(
+    spell: Spells,
+    tcod: &mut Tcod,
+    game: &mut Game,
+    objects: &mut Vec<Object>,
+) -> UseResult {
+    match spell {
+        Spells::Heal => cast_heal(tcod, game, objects),
+        Spells::Lightning => cast_lightning(tcod, game, objects),
+        Spells::Freeze => cast_freeze(tcod, game, objects),
+    }
 }

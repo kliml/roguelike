@@ -4,15 +4,10 @@ use tcod::colors::*;
 
 use serde::{Deserialize, Serialize};
 
-// use crate::Object;
-// use crate::PLAYER;
-// use crate::Game;
-// use crate::Fighter;
-// use crate::Ai;
+use crate::game::Game;
 use crate::help::mut_two;
-use crate::object::DeathCallback;
-use crate::object::Item;
-use crate::*;
+use crate::object::*;
+use crate::settings::PLAYER;
 
 pub const MAP_WIDTH: i32 = 80;
 pub const MAP_HEIGHT: i32 = 43;
@@ -126,6 +121,9 @@ fn create_v_tunnel(y1: i32, y2: i32, x: i32, map: &mut Map) {
 pub fn make_map(objects: &mut Vec<Object>) -> Map {
     let mut map = vec![vec![Tile::wall(); MAP_HEIGHT as usize]; MAP_WIDTH as usize];
 
+    // Clear all objects except PLAYER
+    objects.truncate(1);
+
     let mut rooms = vec![];
 
     for _ in 0..MAX_ROOMS {
@@ -167,6 +165,11 @@ pub fn make_map(objects: &mut Vec<Object>) -> Map {
             rooms.push(new_room);
         }
     }
+
+    let (last_room_x, last_room_y) = rooms[rooms.len() - 1].center();
+    let mut stairs = Object::new(last_room_x, last_room_y, '<', WHITE, "stairs", false);
+    stairs.always_visible = true;
+    objects.push(stairs);
 
     map
 }
@@ -220,7 +223,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
 
         if !is_blocked(x, y, map, objects) {
             let dice = rand::random::<f32>();
-            let item = if dice < 0.7 {
+            let mut item = if dice < 0.7 {
                 let mut object = Object::new(x, y, '!', VIOLET, "healing potion", false);
                 object.item = Some(Item::Heal);
                 object
@@ -230,6 +233,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
                 object.item = Some(Item::Lightning);
                 object
             };
+            item.always_visible = true;
             objects.push(item);
         }
     }

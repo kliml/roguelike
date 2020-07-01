@@ -2,10 +2,8 @@ use tcod::colors::*;
 use tcod::console::*;
 use tcod::input::{self, Event, Key, Mouse};
 use tcod::map::{FovAlgorithm, Map as FovMap};
-
-use serde::{Deserialize, Serialize};
-
 mod ai;
+mod engine;
 mod game;
 mod help;
 mod map;
@@ -14,10 +12,6 @@ mod settings;
 
 use help::closest_monster;
 use map::Map;
-use object::pick_item_up;
-use object::Ai;
-use object::DeathCallback;
-use object::Fighter;
 use object::Object;
 
 use game::*;
@@ -60,13 +54,11 @@ pub struct Tcod {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-enum PlayerAction {
+pub enum PlayerAction {
     TookTurn,
     DidntTakeTurn,
     Exit,
 }
-
-use PlayerAction::*;
 
 fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &Vec<Object>, fov_recompute: bool) {
     if fov_recompute {
@@ -100,7 +92,10 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &Vec<Object>, fov_recom
 
     let mut to_draw: Vec<_> = objects
         .iter()
-        .filter(|o| tcod.fov.is_in_fov(o.x, o.y))
+        .filter(|o| {
+            tcod.fov.is_in_fov(o.x, o.y)
+                || o.always_visible && game.map[o.x as usize][o.y as usize].explored
+        })
         .collect();
     to_draw.sort_by(|o1, o2| o1.blocks.cmp(&o2.blocks));
     for object in &to_draw {
@@ -147,6 +142,15 @@ fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &Vec<Object>, fov_recom
         max_mana,
         LIGHT_BLUE,
         DARK_BLUE,
+    );
+
+    // Display dungeon level
+    tcod.panel.print_ex(
+        1,
+        3,
+        BackgroundFlag::None,
+        TextAlignment::Left,
+        format!("Dungeon level: {}", game.dungeon_level),
     );
 
     // Display object names under mouse
@@ -209,94 +213,6 @@ fn render_bar(
         TextAlignment::Center,
         &format!("{}: {}/{}", name, value, maximum),
     );
-}
-
-fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> PlayerAction {
-    // use tcod::input::Key;
-    use tcod::input::KeyCode::*;
-
-    let player_alive = objects[PLAYER].alive;
-    match (tcod.key, tcod.key.text(), player_alive) {
-        (
-            Key {
-                code: Enter,
-                alt: true,
-                ..
-            },
-            _,
-            _,
-        ) => {
-            let fullscreen = tcod.root.is_fullscreen();
-            tcod.root.set_fullscreen(!fullscreen);
-            DidntTakeTurn
-        }
-
-        (Key { code: Escape, .. }, _, _) => Exit,
-        (Key { code: Up, .. }, _, true) => {
-            map::player_move_or_attack(0, -1, game, objects);
-            TookTurn
-        }
-        (Key { code: Down, .. }, _, true) => {
-            map::player_move_or_attack(0, 1, game, objects);
-            TookTurn
-        }
-        (Key { code: Left, .. }, _, true) => {
-            map::player_move_or_attack(-1, 0, game, objects);
-            TookTurn
-        }
-        (Key { code: Right, .. }, _, true) => {
-            map::player_move_or_attack(1, 0, game, objects);
-            TookTurn
-        }
-        (Key { code: Text, .. }, "g", true) => {
-            let item_id = objects
-                .iter()
-                .position(|obj| obj.pos() == objects[PLAYER].pos() && obj.item.is_some());
-            if let Some(item_id) = item_id {
-                pick_item_up(item_id, game, objects);
-            }
-            DidntTakeTurn
-        }
-        (Key { code: Text, .. }, "i", true) => {
-            let inventory_index = menu::inventory_menu(
-                &game.inventory,
-                "Press the key next to an item to use it, or any other to cancel.\n",
-                &mut tcod.root,
-            );
-            if let Some(inventory_index) = inventory_index {
-                use_item(inventory_index, tcod, game, objects);
-            }
-            // maybe TookTurn
-            DidntTakeTurn
-        }
-        (Key { code: Text, .. }, "s", true) => {
-            let spell_id = menu::spell_menu(&mut tcod.root);
-            if let Some(spell_id) = spell_id {
-                use object::spells::*;
-                let spell = match spell_id {
-                    0 => Spells::Heal,
-                    1 => Spells::Lightning,
-                    2 => Spells::Freeze,
-                    _ => return DidntTakeTurn,
-                };
-                cast_spell(spell, tcod, game, objects);
-                return TookTurn;
-            }
-            DidntTakeTurn
-        }
-
-        // Cheats hehe
-        (Key { code: Text, .. }, "m", _) => {
-            for x in 0..map::MAP_WIDTH {
-                for y in 0..map::MAP_HEIGHT {
-                    game.map[x as usize][y as usize].explored = true;
-                }
-            }
-            DidntTakeTurn
-        }
-
-        _ => DidntTakeTurn,
-    }
 }
 
 fn get_names_under_mouse(mouse: Mouse, objects: &Vec<Object>, fov_map: &FovMap) -> String {

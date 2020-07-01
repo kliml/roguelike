@@ -20,6 +20,7 @@ pub struct Object {
     pub ai: Option<Ai>,
     pub item: Option<Item>,
     pub effect: Option<StatusEffect>,
+    pub always_visible: bool,
 }
 
 impl Object {
@@ -36,6 +37,7 @@ impl Object {
             ai: None,
             item: None,
             effect: None,
+            always_visible: false,
         }
     }
 
@@ -110,6 +112,15 @@ impl Object {
             fighter.hp += amount;
             if fighter.hp > fighter.max_hp {
                 fighter.hp = fighter.max_hp;
+            }
+        }
+    }
+
+    pub fn recover_mana(&mut self, amount: i32) {
+        if let Some(ref mut fighter) = self.fighter {
+            fighter.mana += amount;
+            if fighter.mana > fighter.max_mana {
+                fighter.mana = fighter.max_mana;
             }
         }
     }
