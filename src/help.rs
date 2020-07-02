@@ -1,9 +1,9 @@
 use std::cmp;
 
 use super::object::Object;
+use crate::game::Game;
 use crate::Tcod;
 use crate::PLAYER;
-use crate::game::Game;
 
 pub fn mut_two<T>(first_index: usize, second_index: usize, items: &mut Vec<T>) -> (&mut T, &mut T) {
     assert!(first_index != second_index);
@@ -42,8 +42,8 @@ pub fn target_tile(
     objects: &Vec<Object>,
     max_range: Option<f32>,
 ) -> Option<(i32, i32)> {
-    use tcod::input::{ self, Event, KeyCode::Escape };
     use crate::render_all;
+    use tcod::input::{self, Event, KeyCode::Escape};
 
     loop {
         tcod.root.flush();
@@ -64,6 +64,25 @@ pub fn target_tile(
         }
         if tcod.mouse.rbutton_pressed || tcod.key.code == Escape {
             return None;
+        }
+    }
+}
+
+pub fn targer_monster(
+    tcod: &mut Tcod,
+    game: &mut Game,
+    objects: &Vec<Object>,
+    max_range: Option<f32>,
+) -> Option<usize> {
+    loop {
+        match target_tile(tcod, game, objects, max_range) {
+            Some((x, y)) => {
+                return objects
+                    .iter()
+                    .skip(1)
+                    .position(|o| o.pos() == (x, y) && o.fighter.is_some());
+            }
+            None => return None,
         }
     }
 }

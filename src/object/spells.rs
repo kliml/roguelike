@@ -78,12 +78,14 @@ const FREEZE_MANA_COST: i32 = 5;
 fn cast_freeze(_tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> UseResult {
     if let Some(mut fighter) = objects[PLAYER].fighter {
         if fighter.mana >= FREEZE_MANA_COST {
-            game.messages.add("Temperature around you begins to drop...", RED);
+            game.messages
+                .add("Temperature around you begins to drop...", LIGHT_BLUE);
 
             let (x, y) = objects[PLAYER].pos();
 
             for i in 1..objects.len() {
-                if objects[i].distance(x, y) <= FREEZE_RADIUS as f32 && objects[i].fighter.is_some() {
+                if objects[i].distance(x, y) <= FREEZE_RADIUS as f32 && objects[i].fighter.is_some()
+                {
                     game.messages.add(
                         format!(
                             "{} becomes frozen for {} turns!",
@@ -102,7 +104,6 @@ fn cast_freeze(_tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> 
             fighter.mana -= FREEZE_MANA_COST;
             objects[PLAYER].fighter = Some(fighter);
             return UseResult::UsedUp;
-
         } else {
             game.messages.add("Not enough mana to cast Freeze", RED);
             return UseResult::Cancelled;
