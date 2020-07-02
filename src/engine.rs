@@ -75,6 +75,7 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
                     0 => Spells::Heal,
                     1 => Spells::Lightning,
                     2 => Spells::Freeze,
+                    3 => Spells::Fireball,
                     _ => return DidntTakeTurn,
                 };
                 match cast_spell(spell, tcod, game, objects) {

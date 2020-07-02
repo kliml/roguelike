@@ -143,7 +143,7 @@ pub fn inventory_menu(inventory: &Vec<Object>, header: &str, root: &mut Root) ->
 
 pub fn spell_menu(root: &mut Root) -> Option<usize> {
     let header = "Choose your spell!";
-    let options = vec!["Heal", "Lightning", "Freeze"];
+    let options = vec!["Heal", "Lightning", "Freeze", "Fireball"];
 
     let spell_id = menu(header, &options, INVENTORY_WIDTH, root);
 

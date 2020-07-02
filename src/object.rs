@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::Game;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Object {
     pub x: i32,
     pub y: i32,
@@ -55,10 +55,15 @@ impl Object {
         self.y = y;
     }
 
+    /// return disstance to another object
     pub fn distance_to(&self, other: &Object) -> f32 {
         let dx = other.x - self.x;
         let dy = other.y - self.y;
         ((dx.pow(2) + dy.pow(2)) as f32).sqrt()
+    }
+
+    pub fn distance(&self, x: i32, y: i32) -> f32 {
+        (((x - self.x).pow(2) + (y - self.y).pow(2)) as f32).sqrt()
     }
 
     pub fn take_damage(&mut self, damage: i32, game: &mut Game) {
