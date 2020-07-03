@@ -1,4 +1,5 @@
 pub mod spells;
+pub mod items;
 
 use tcod::colors::*;
 use tcod::console::*;
@@ -140,6 +141,8 @@ pub struct Fighter {
     pub mana: i32,
     pub defense: i32,
     pub power: i32,
+    pub xp: i32,
+    pub level: i32,
     pub on_death: DeathCallback,
 }
 

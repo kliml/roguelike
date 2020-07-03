@@ -1,12 +1,13 @@
-use tcod::input::{self, Event, Key, Mouse};
+use tcod::input::Key;
 
 use crate::game::menu;
 use crate::game::{next_level, Game};
 use crate::map;
 use crate::object::{self, *};
 use crate::PlayerAction::{self, *};
-use crate::UseResult::{self, *};
-use crate::{use_item, Tcod};
+use crate::UseResult;
+use crate::{ Tcod};
+use crate::object::items::use_item;
 
 use crate::settings::PLAYER;
 

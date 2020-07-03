@@ -3,6 +3,10 @@ My implementation of [rogulike in Rust](https://tomassedovic.github.io/roguelike
 * Modular project system
 * Magic system
 
+## TODO
+* Level system as learning new spells and upgrading them
+New enum KnownSpell, with Display implemented.
+
 ## Controls
 * Arrows - movement
 * G - pick up item

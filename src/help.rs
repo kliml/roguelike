@@ -4,6 +4,9 @@ use super::object::Object;
 use crate::game::Game;
 use crate::Tcod;
 use crate::PLAYER;
+use tcod::input::Mouse;
+use tcod::map::Map as FovMap;
+use crate::renderer::*;
 
 pub fn mut_two<T>(first_index: usize, second_index: usize, items: &mut Vec<T>) -> (&mut T, &mut T) {
     assert!(first_index != second_index);
@@ -42,7 +45,6 @@ pub fn target_tile(
     objects: &Vec<Object>,
     max_range: Option<f32>,
 ) -> Option<(i32, i32)> {
-    use crate::render_all;
     use tcod::input::{self, Event, KeyCode::Escape};
 
     loop {
@@ -85,4 +87,16 @@ pub fn targer_monster(
             None => return None,
         }
     }
+}
+
+pub fn get_names_under_mouse(mouse: Mouse, objects: &Vec<Object>, fov_map: &FovMap) -> String {
+    let (x, y) = (mouse.cx as i32, mouse.cy as i32);
+
+    let names = objects
+        .iter()
+        .filter(|obj| obj.pos() == (x, y) && fov_map.is_in_fov(obj.x, obj.y))
+        .map(|obj| obj.name.clone())
+        .collect::<Vec<_>>();
+
+    names.join(", ")
 }

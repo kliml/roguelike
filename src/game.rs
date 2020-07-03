@@ -6,7 +6,7 @@ use std::fs::File;
 use std::io::{Read, Write};
 use tcod::colors::*;
 use tcod::console::*;
-use tcod::input::{self, Event, Key, Mouse};
+use tcod::input::{self, Event};
 
 use serde::{Deserialize, Serialize};
 
@@ -14,11 +14,9 @@ use crate::ai;
 use crate::map;
 use crate::object;
 use crate::settings::*;
-//use crate::Game;
 use crate::Tcod;
-
 use crate::engine::handle_keys;
-use crate::render_all;
+use crate::renderer::*;
 use crate::PlayerAction;
 
 use map::make_map;
@@ -48,6 +46,8 @@ pub fn new_game(tcod: &mut Tcod) -> (Game, Vec<Object>) {
         mana: 30,
         defense: 2,
         power: 5,
+        xp: 0,
+        level: 1,
         on_death: DeathCallback::Player,
     });
 

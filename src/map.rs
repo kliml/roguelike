@@ -192,6 +192,8 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
                     mana: 0,
                     defense: 0,
                     power: 3,
+                    xp: 35,
+                    level: 1,
                     on_death: DeathCallback::Monster,
                 });
                 ork.ai = Some(Ai::Basic);
@@ -206,6 +208,8 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
                     mana: 0,
                     defense: 1,
                     power: 4,
+                    xp: 100,
+                    level: 1,
                     on_death: DeathCallback::Monster,
                 });
                 troll.ai = Some(Ai::Basic);
