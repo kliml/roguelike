@@ -1,5 +1,7 @@
-pub mod spells;
 pub mod items;
+pub mod spells;
+
+use spells::Spells;
 
 use tcod::colors::*;
 use tcod::console::*;

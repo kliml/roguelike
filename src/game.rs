@@ -11,13 +11,14 @@ use tcod::input::{self, Event};
 use serde::{Deserialize, Serialize};
 
 use crate::ai;
+use crate::engine::handle_keys;
 use crate::map;
 use crate::object;
-use crate::settings::*;
-use crate::Tcod;
-use crate::engine::handle_keys;
 use crate::renderer::*;
+use crate::settings::*;
 use crate::PlayerAction;
+use crate::Tcod;
+use object::spells::Spells;
 
 use map::make_map;
 use map::Map;
@@ -33,6 +34,7 @@ pub struct Game {
     pub messages: Messages,
     pub inventory: Vec<Object>,
     pub dungeon_level: u32,
+    pub spells: Vec<Spells>,
 }
 
 pub fn new_game(tcod: &mut Tcod) -> (Game, Vec<Object>) {
@@ -58,6 +60,12 @@ pub fn new_game(tcod: &mut Tcod) -> (Game, Vec<Object>) {
         messages: Messages::new(),
         inventory: vec![],
         dungeon_level: 1,
+        spells: vec![
+            Spells::Heal,
+            Spells::Lightning,
+            Spells::Freeze,
+            Spells::Fireball,
+        ],
     };
 
     initialise_fov(tcod, &game.map);

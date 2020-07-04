@@ -141,9 +141,15 @@ pub fn inventory_menu(inventory: &Vec<Object>, header: &str, root: &mut Root) ->
     }
 }
 
-pub fn spell_menu(root: &mut Root) -> Option<usize> {
+pub fn spell_menu(spells: &Vec<Spells>, header: &str, root: &mut Root) -> Option<usize> {
     let header = "Choose your spell!";
     let options = vec!["Heal", "Lightning", "Freeze", "Fireball"];
+
+    let options = if spells.len() == 0 {
+        vec!["Invetory is empty.".into()]
+    } else {
+        spells.iter().map(|item| item.to_string().clone()).collect()
+    };
 
     let spell_id = menu(header, &options, INVENTORY_WIDTH, root);
 

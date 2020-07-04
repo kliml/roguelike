@@ -1,14 +1,23 @@
+use serde::{Deserialize, Serialize};
+use std::fmt::{self, Formatter};
 use tcod::colors::*;
 
 use crate::object::{Effect, Object, StatusEffect};
 use crate::settings::*;
 use crate::{closest_monster, Game, Tcod, UseResult};
 
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum Spells {
     Heal,
     Lightning,
     Freeze,
     Fireball,
+}
+
+impl fmt::Display for Spells {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
 
 const HEAL_AMOUNT: i32 = 4;

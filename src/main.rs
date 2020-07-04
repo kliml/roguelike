@@ -7,13 +7,13 @@ mod game;
 mod help;
 mod map;
 mod object;
-mod settings;
 mod renderer;
+mod settings;
 
 use help::closest_monster;
+use help::get_names_under_mouse;
 use map::Map;
 use object::Object;
-use help::get_names_under_mouse;
 
 use game::*;
 
