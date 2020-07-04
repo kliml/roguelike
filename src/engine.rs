@@ -9,7 +9,7 @@ use crate::PlayerAction::{self, *};
 use crate::Tcod;
 use crate::UseResult;
 
-use crate::settings::PLAYER;
+use crate::settings::*;
 
 pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> PlayerAction {
     use tcod::input::KeyCode::*;
@@ -47,6 +47,7 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
             map::player_move_or_attack(1, 0, game, objects);
             TookTurn
         }
+        // Pick up item
         (Key { code: Text, .. }, "g", true) => {
             let item_id = objects
                 .iter()
@@ -56,6 +57,7 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
             }
             DidntTakeTurn
         }
+        // Inventory
         (Key { code: Text, .. }, "i", true) => {
             let inventory_index = menu::inventory_menu(
                 &game.inventory,
@@ -68,6 +70,7 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
             // maybe TookTurn
             DidntTakeTurn
         }
+        // Spells
         (Key { code: Text, .. }, "s", true) => {
             let spell_id = menu::spell_menu(
                 &game.spells,
@@ -83,6 +86,7 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
             }
             DidntTakeTurn
         }
+        // Move to the next floor
         (Key { code: Text, .. }, "d", true) => {
             let player_on_stairs = objects
                 .iter()
@@ -92,7 +96,34 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
             }
             DidntTakeTurn
         }
-
+        // Character information
+        (Key { code: Text, .. }, "o", _) => {
+            let player = &objects[PLAYER];
+            let level = player.level;
+            let level_up_xp = LEVEL_UP_BASE + player.level * LEVEL_UP_FACTOR;
+            let known_spells = game.spells.len();
+            if let Some(fighter) = player.fighter.as_ref() {
+                let msg = format!(
+                    "Character information\n \
+                    Level: {}\n \
+                    Experience: {}\n \
+                    Experience to level up: {}\n \
+                    Maximum HP: {}\n \
+                    Attack: {}\n \
+                    Defense: {}\n \
+                    Spells known: {}",
+                    level,
+                    fighter.xp,
+                    level_up_xp,
+                    fighter.max_hp,
+                    fighter.power,
+                    fighter.defense,
+                    known_spells,
+                );
+                menu::msgbox(&msg, CHARACTER_SCREEN_WIDTH, &mut tcod.root);
+            }
+            DidntTakeTurn
+        }
         // Cheats hehe
         (Key { code: Text, .. }, "m", _) => {
             for x in 0..map::MAP_WIDTH {

@@ -49,7 +49,6 @@ pub fn new_game(tcod: &mut Tcod) -> (Game, Vec<Object>) {
         defense: 2,
         power: 5,
         xp: 0,
-        level: 1,
         on_death: DeathCallback::Player,
     });
 
@@ -106,6 +105,8 @@ pub fn play_game(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
 
         tcod.root.flush();
 
+        level_up(tcod, game, objects);
+
         previous_player_position = objects[PLAYER].pos();
         let player_action = handle_keys(tcod, game, objects);
         if player_action == PlayerAction::Exit {
@@ -151,11 +152,52 @@ pub fn next_level(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
 
     game.messages.add(
         "After a rare moment of peace, you descend deeper into \
-         the heart of the dungeon...",
+        the heart of the dungeon...",
         RED,
     );
 
     game.dungeon_level += 1;
     game.map = make_map(objects);
     initialise_fov(tcod, &game.map);
+}
+
+pub fn level_up(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
+    let player = &mut objects[PLAYER];
+    let level_up_exp = LEVEL_UP_BASE + player.level * LEVEL_UP_FACTOR;
+    if player.fighter.map_or(0, |f| f.xp) >= level_up_exp {
+        player.level += 1;
+        game.messages.add(
+            format!(
+                "Your battle skills grow stronger! You reached level {}!",
+                player.level
+            ),
+            YELLOW,
+        );
+
+        let fighter = objects[PLAYER].fighter.as_mut().unwrap();
+        let mut choice = None;
+        while choice.is_none() {
+            choice = menu::menu(
+                "Level up! Choose a buff:\n",
+                &vec![
+                    format!("+20 HP, from {}", fighter.max_hp),
+                    format!("+20 MP, from {}", fighter.max_mana),
+                ],
+                LEVEL_SCREEN_WIDTH,
+                &mut tcod.root,
+            );
+        }
+        fighter.xp -= level_up_exp;
+        match choice.unwrap() {
+            0 => {
+                fighter.max_hp += 20;
+                fighter.hp += 20;
+            }
+            1 => {
+                fighter.max_mana += 20;
+                fighter.mana += 20;
+            }
+            _ => unreachable!(),
+        }
+    }
 }

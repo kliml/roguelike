@@ -69,7 +69,7 @@ pub fn menu<T: AsRef<str>>(
     }
 }
 
-fn msgbox(text: &str, width: i32, root: &mut Root) {
+pub fn msgbox(text: &str, width: i32, root: &mut Root) {
     let options: &Vec<&str> = &vec![];
     menu(text, options, width, root);
 }

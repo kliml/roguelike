@@ -1,8 +1,6 @@
 pub mod items;
 pub mod spells;
 
-use spells::Spells;
-
 use tcod::colors::*;
 use tcod::console::*;
 
@@ -24,6 +22,7 @@ pub struct Object {
     pub item: Option<Item>,
     pub effect: Option<StatusEffect>,
     pub always_visible: bool,
+    pub level: i32,
 }
 
 impl Object {
@@ -41,6 +40,7 @@ impl Object {
             item: None,
             effect: None,
             always_visible: false,
+            level: 1,
         }
     }
 
@@ -69,29 +69,26 @@ impl Object {
         (((x - self.x).pow(2) + (y - self.y).pow(2)) as f32).sqrt()
     }
 
-    pub fn take_damage(&mut self, damage: i32, game: &mut Game) {
+    pub fn take_damage(&mut self, damage: i32, game: &mut Game) -> Option<i32> {
         if let Some(fighter) = self.fighter.as_mut() {
             if damage > 0 {
                 fighter.hp -= damage;
             }
         }
-
         if let Some(fighter) = self.fighter {
             if fighter.hp <= 0 {
                 self.alive = false;
                 fighter.on_death.callback(self, game);
+                return Some(fighter.xp);
             }
         }
+        None
     }
 
     pub fn attack(&mut self, target: &mut Object, game: &mut Game) {
         // damage = power - defense
         let damage = self.fighter.map_or(0, |f| f.power) - target.fighter.map_or(0, |f| f.defense);
         if damage > 0 {
-            // println!(
-            //     "{} attacks {} for {} hit points.",
-            //     self.name, target.name, damage
-            // );
             game.messages.add(
                 format!(
                     "{} attacks {} for {} hit points.",
@@ -99,12 +96,10 @@ impl Object {
                 ),
                 WHITE,
             );
-            target.take_damage(damage, game);
+            if let Some(xp) = target.take_damage(damage, game) {
+                self.fighter.as_mut().unwrap().xp += xp;
+            };
         } else {
-            // println!(
-            //     "{} attacks {} but it has no effect!",
-            //     self.name, target.name
-            // );
             game.messages.add(
                 format!(
                     "{} attacks {} but it has no effect!",
@@ -144,7 +139,6 @@ pub struct Fighter {
     pub defense: i32,
     pub power: i32,
     pub xp: i32,
-    pub level: i32,
     pub on_death: DeathCallback,
 }
 
@@ -173,7 +167,14 @@ fn player_death(player: &mut Object, game: &mut Game) {
 
 fn monster_death(monster: &mut Object, game: &mut Game) {
     //println!("{} is dead!", monster.name);
-    game.messages.add(format!("{} died!", monster.name), ORANGE);
+    game.messages.add(
+        format!(
+            "{} died! You gain {} experience points.",
+            monster.name,
+            monster.fighter.unwrap().xp
+        ),
+        ORANGE,
+    );
     monster.char = '%';
     monster.color = DARK_RED;
     monster.blocks = false;
