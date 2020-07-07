@@ -64,6 +64,7 @@ pub fn new_game(tcod: &mut Tcod) -> (Game, Vec<Object>) {
             Spells::Lightning,
             Spells::Freeze,
             Spells::Fireball,
+            Spells::Wall,
         ],
     };
 

@@ -2,9 +2,10 @@ use serde::{Deserialize, Serialize};
 use std::fmt::{self, Formatter};
 use tcod::colors::*;
 
-use crate::object::{Effect, Object, StatusEffect};
+use crate::object::{Effect, Object, StatusEffect, Fighter, DeathCallback};
 use crate::settings::*;
 use crate::{closest_monster, Game, Tcod, UseResult};
+use crate::help::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum Spells {
@@ -12,6 +13,7 @@ pub enum Spells {
     Lightning,
     Freeze,
     Fireball,
+    Wall,
 }
 
 impl fmt::Display for Spells {
@@ -111,7 +113,6 @@ const FIREBALL_RADIUS: i32 = 3;
 const FIREBALL_DAMAGE: i32 = 12;
 const FIREBALL_MANA_COST: i32 = 7;
 fn cast_fireball(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> UseResult {
-    use crate::help::target_tile;
     if objects[PLAYER].fighter.map_or(0, |f| f.mana) >= FIREBALL_MANA_COST {
         game.messages.add(
             "Left-click a target tile for the Fireball, or right-click to cancel.",
@@ -154,7 +155,36 @@ const WALL_SIZE: i32 = 1;
 const WALL_HP: i32 = 1;
 const WALL_MANA_COST: i32 = 5;
 fn cast_wall(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> UseResult {
-    unimplemented!("no yet done)");
+
+    if objects[PLAYER].fighter.map_or(0, |f| f.mana) >= WALL_MANA_COST {
+        game.messages.add(
+            "Left-click a target tile for the Wall, or right-click to cancel.",
+            LIGHT_CYAN,
+        );
+        let (x, y) = match target_tile(tcod, game, objects, None) {
+            Some(tile_pos) => tile_pos,
+            None => return UseResult::Cancelled,
+        };
+        let mut wall = Object::new(x, y, 'w', BRASS, "wall", true);
+        wall.fighter = Some(Fighter {
+            max_hp: WALL_HP,
+            hp: WALL_HP,
+            max_mana: 0,
+            mana: 0,
+            defense: 0,
+            power: 0,
+            xp: 0,
+            on_death: DeathCallback::Monster,
+        });
+        objects.push(wall);
+        game.messages.add(
+            format!(
+                "The ground shaters, blocking several tiles!",
+            ),
+            BRASS,
+        );
+        objects[PLAYER].fighter.as_mut().unwrap().mana -= WALL_MANA_COST;
+    }
     UseResult::Cancelled
 }
 
@@ -169,5 +199,6 @@ pub fn cast_spell(
         Spells::Lightning => cast_lightning(tcod, game, objects),
         Spells::Freeze => cast_freeze(tcod, game, objects),
         Spells::Fireball => cast_fireball(tcod, game, objects),
+        Spells::Wall => cast_wall(tcod, game, objects),
     }
 }
