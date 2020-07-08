@@ -3,7 +3,7 @@ use tcod::input::Key;
 use crate::game::menu;
 use crate::game::{next_level, Game};
 use crate::map;
-use crate::object::items::use_item;
+use crate::object::items::{ use_item, drop_item };
 use crate::object::{self, *};
 use crate::PlayerAction::{self, *};
 use crate::Tcod;
@@ -70,6 +70,18 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
             // maybe TookTurn
             DidntTakeTurn
         }
+        // Drop item
+        (Key { code: Text, ..}, "d", true) => {
+            let inventory_index = menu::inventory_menu(
+                &game.inventory,
+                "Press the key next to an item to drop it, or any other to cancel.\n",
+                &mut tcod.root,
+            );
+            if let Some(inventory_index) = inventory_index {
+                drop_item(inventory_index, game, objects);
+            }
+            DidntTakeTurn
+        }
         // Spells
         (Key { code: Text, .. }, "s", true) => {
             let spell_id = menu::spell_menu(
@@ -87,7 +99,7 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
             DidntTakeTurn
         }
         // Move to the next floor
-        (Key { code: Text, .. }, "d", true) => {
+        (Key { code: Text, .. }, "e", true) => {
             let player_on_stairs = objects
                 .iter()
                 .any(|object| object.pos() == objects[PLAYER].pos() && object.name == "stairs");

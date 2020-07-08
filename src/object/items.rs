@@ -25,6 +25,15 @@ pub fn use_item(inventory_id: usize, tcod: &mut Tcod, game: &mut Game, objects: 
     }
 }
 
+pub fn drop_item(inventory_id: usize, game: &mut Game, objects: &mut Vec<Object>) {
+    let mut item = game.inventory.remove(inventory_id);
+    let (x, y) = objects[PLAYER].pos();
+    item.set_pos(x, y);
+    game.messages
+        .add(format!("You dropped a {}.", item.name), YELLOW);
+    objects.push(item);
+}
+
 const HEAL_AMOUNT: i32 = 4;
 pub fn cast_heal(
     _inventory_id: usize,
