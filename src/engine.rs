@@ -145,6 +145,10 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
             }
             DidntTakeTurn
         }
+        (Key { code: Text, ..}, "y", true) => {
+            objects[PLAYER].fighter.as_mut().unwrap().xp += 100;
+            DidntTakeTurn
+        }
 
         _ => DidntTakeTurn,
     }
