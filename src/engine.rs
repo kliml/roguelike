@@ -48,7 +48,7 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
             TookTurn
         }
         // Pick up item
-        (Key { code: Text, .. }, "g", true) => {
+        (Key { code: Text, .. }, "e", true) => {
             let item_id = objects
                 .iter()
                 .position(|obj| obj.pos() == objects[PLAYER].pos() && obj.item.is_some());
@@ -58,7 +58,7 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
             DidntTakeTurn
         }
         // Inventory
-        (Key { code: Text, .. }, "i", true) => {
+        (Key { code: Text, .. }, "w", true) => {
             let inventory_index = menu::inventory_menu(
                 &game.inventory,
                 "Press the key next to an item to use it, or any other to cancel.\n",
@@ -71,7 +71,7 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
             DidntTakeTurn
         }
         // Drop item
-        (Key { code: Text, ..}, "d", true) => {
+        (Key { code: Text, ..}, "r", true) => {
             let inventory_index = menu::inventory_menu(
                 &game.inventory,
                 "Press the key next to an item to drop it, or any other to cancel.\n",
@@ -83,7 +83,7 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
             DidntTakeTurn
         }
         // Spells
-        (Key { code: Text, .. }, "s", true) => {
+        (Key { code: Text, .. }, "q", true) => {
             let spell_id = menu::spell_menu(
                 &game.spells,
                 "Press the key next to an spell to use it, or any other to cancel.\n",
@@ -99,7 +99,7 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
             DidntTakeTurn
         }
         // Move to the next floor
-        (Key { code: Text, .. }, "e", true) => {
+        (Key { code: Text, .. }, "f", true) => {
             let player_on_stairs = objects
                 .iter()
                 .any(|object| object.pos() == objects[PLAYER].pos() && object.name == "stairs");
@@ -109,7 +109,7 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
             DidntTakeTurn
         }
         // Character information
-        (Key { code: Text, .. }, "o", _) => {
+        (Key { code: Text, .. }, "t", _) => {
             let player = &objects[PLAYER];
             let level = player.level;
             let level_up_xp = LEVEL_UP_BASE + player.level * LEVEL_UP_FACTOR;
@@ -145,7 +145,7 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
             }
             DidntTakeTurn
         }
-        (Key { code: Text, ..}, "y", true) => {
+        (Key { code: Text, ..}, "n", true) => {
             objects[PLAYER].fighter.as_mut().unwrap().xp += 100;
             DidntTakeTurn
         }

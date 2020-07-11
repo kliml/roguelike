@@ -6,7 +6,7 @@ use crate::Game;
 use crate::Map;
 use crate::Object;
 use crate::Tcod;
-use crate::PLAYER;
+use crate::settings::PLAYER;
 
 use crate::object::Effect;
 

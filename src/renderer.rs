@@ -1,5 +1,6 @@
 use crate::*;
 use tcod::colors::*;
+use crate::settings::*;
 
 pub fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &Vec<Object>, fov_recompute: bool) {
     if fov_recompute {
@@ -84,11 +85,24 @@ pub fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &Vec<Object>, fov_r
         LIGHT_BLUE,
         DARK_BLUE,
     );
+    let xp = objects[PLAYER].fighter.map_or(0, |f| f.xp);
+    let xp_needed = LEVEL_UP_BASE + objects[PLAYER].level * LEVEL_UP_FACTOR;
+    render_bar(
+        &mut tcod.panel,
+        1,
+        3,
+        BAR_WIDTH,
+        "EXP",
+        xp,
+        xp_needed,
+        LIGHT_GREEN,
+        DARK_GREEN,
+    );
 
     // Display dungeon level
     tcod.panel.print_ex(
         1,
-        3,
+        4,
         BackgroundFlag::None,
         TextAlignment::Left,
         format!("Dungeon level: {}", game.dungeon_level),

@@ -4,7 +4,7 @@ use super::object::Object;
 use crate::game::Game;
 use crate::renderer::*;
 use crate::Tcod;
-use crate::PLAYER;
+use crate::settings::PLAYER;
 use tcod::input::Mouse;
 use tcod::map::Map as FovMap;
 

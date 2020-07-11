@@ -1,4 +1,5 @@
-use crate::{closest_monster, object, Game, Object, Tcod, UseResult, PLAYER};
+use crate::{closest_monster, object, Game, Object, Tcod, UseResult};
+use crate::settings::PLAYER;
 use tcod::colors::*;
 
 pub fn use_item(inventory_id: usize, tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {

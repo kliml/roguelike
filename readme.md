@@ -9,9 +9,14 @@ New enum KnownSpell, with Display implemented.
 
 ## Controls
 * Arrows - movement
-* G - pick up item
-* I - inventory
-* S - spells
-* D - ascend to next dungeon level
+* E - pick up item
+* R - drop item
+* W - inventory
+* Q - spells
+* F - ascend to next dungeon level
 * Esc - exit
 * Hover mouse over object in FOV to see what it is!
+
+### Cheats
+* M - reveal map
+* N - gain 350 xp

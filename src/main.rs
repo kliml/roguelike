@@ -16,29 +16,13 @@ use map::Map;
 use object::Object;
 
 use game::*;
-
-// Window size
-const SCREEN_WIDTH: i32 = 80;
-const SCREEN_HEIGHT: i32 = 50;
-
-// GUI size
-const BAR_WIDTH: i32 = 20;
-const PANEL_HEIGHT: i32 = 7;
-const PANEL_Y: i32 = SCREEN_HEIGHT - PANEL_HEIGHT;
-
-// Messages
-const MSG_X: i32 = BAR_WIDTH + 2;
-const MSG_WIDTH: i32 = SCREEN_WIDTH - BAR_WIDTH - 2;
-const MSG_HEIGHT: usize = PANEL_HEIGHT as usize - 1;
+use settings::*;
 
 // Inevtory width
 const INVENTORY_WIDTH: i32 = 50;
 
 // FPS Limit
 const LIMIT_FPS: i32 = 20;
-
-// Player pos in vec
-pub const PLAYER: usize = 0;
 
 // FOV
 const FOV_ALGO: FovAlgorithm = FovAlgorithm::Basic;
