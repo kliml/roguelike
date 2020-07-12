@@ -192,6 +192,7 @@ pub enum Ai {
 pub enum Item {
     Heal,
     Lightning,
+    Mana,
 }
 
 pub const INVENTORY_SIZE: usize = 26;

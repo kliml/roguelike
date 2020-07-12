@@ -231,10 +231,16 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
                 object
             } else {
                 let mut object =
-                    Object::new(x, y, '#', LIGHT_YELLOW, "scroll of lightning bolt", false);
-                object.item = Some(Item::Lightning);
+                    Object::new(x, y, '!', LIGHT_BLUE, "mana potion", false);
+                object.item = Some(Item::Mana);
                 object
             };
+            // } else {
+            //     let mut object =
+            //         Object::new(x, y, '#', LIGHT_YELLOW, "scroll of lightning bolt", false);
+            //     object.item = Some(Item::Lightning);
+            //     object
+            // };
             item.always_visible = true;
             objects.push(item);
         }

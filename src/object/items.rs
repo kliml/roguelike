@@ -9,6 +9,7 @@ pub fn use_item(inventory_id: usize, tcod: &mut Tcod, game: &mut Game, objects: 
         let on_use = match item {
             Heal => cast_heal,
             Lightning => cast_lightning,
+            Mana => cast_mana,
         };
         match on_use(inventory_id, tcod, game, objects) {
             UseResult::UsedUp => {
@@ -50,6 +51,26 @@ pub fn cast_heal(
         game.messages
             .add("Your wounds start to feel better!", LIGHT_VIOLET);
         objects[PLAYER].heal(HEAL_AMOUNT);
+        return UseResult::UsedUp;
+    }
+    UseResult::Cancelled
+}
+
+const MANA_AMOUNT: i32 = 10;
+pub fn cast_mana(
+    _inventory_id: usize,
+    _tcod: &mut Tcod,
+    game: &mut Game,
+    objects: &mut Vec<Object>,
+) -> UseResult {
+    if let Some(fighter) = objects[PLAYER].fighter {
+        if fighter.mana == fighter.max_hp {
+            game.messages.add("You are already at full mana.", RED);
+            return UseResult::Cancelled;
+        }
+        game.messages
+            .add("You retore your energy!", LIGHT_VIOLET);
+        objects[PLAYER].recover_mana(MANA_AMOUNT);
         return UseResult::UsedUp;
     }
     UseResult::Cancelled
