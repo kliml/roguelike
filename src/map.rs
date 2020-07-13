@@ -1,4 +1,5 @@
 use rand::Rng;
+use rand::distributions::{IndependentSample, Weighted, WeightedChoice};
 use std::cmp;
 use tcod::colors::*;
 
@@ -182,6 +183,19 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
         let y = rand::thread_rng().gen_range(room.y1 + 1, room.y2);
 
         if !is_blocked(x, y, map, objects) {
+
+            let monster_chances = &mut [
+                Weighted {
+                    weight: 80,
+                    item: "orc",
+                },
+                Weighted {
+                    weight: 20,
+                    item: "troll",
+                },
+            ];
+            let monster_choice = WeightedChoice::new(monster_chances);
+
             let monster = if rand::random::<f32>() < 0.8 {
                 let mut ork = Object::new(x, y, 'o', DESATURATED_GREEN, "ork", true);
                 ork.alive = true;
