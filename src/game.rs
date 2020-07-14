@@ -13,18 +13,14 @@ use serde::{Deserialize, Serialize};
 use crate::ai;
 use crate::engine::handle_keys;
 use crate::map;
-use crate::object;
+use crate::object::{ self, DeathCallback, Fighter, Object, PlayerAction};
 use crate::renderer::*;
 use crate::settings::*;
-use crate::PlayerAction;
 use crate::Tcod;
 use object::spells::Spells;
 
 use map::make_map;
 use map::Map;
-use object::DeathCallback;
-use object::Fighter;
-use object::Object;
 
 use messages::*;
 

@@ -2,9 +2,9 @@ use serde::{Deserialize, Serialize};
 use std::fmt::{self, Formatter};
 use tcod::colors::*;
 
-use crate::object::{Effect, Object, StatusEffect, Fighter, DeathCallback};
+use crate::object::{Effect, Object, StatusEffect, Fighter, DeathCallback, UseResult};
 use crate::settings::*;
-use crate::{closest_monster, Game, Tcod, UseResult};
+use crate::{closest_monster, Game, Tcod};
 use crate::help::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]

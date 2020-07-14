@@ -1,4 +1,5 @@
-use crate::{closest_monster, object, Game, Object, Tcod, UseResult};
+use crate::{closest_monster, object, Game, Object, Tcod};
+use crate::object::UseResult;
 use crate::settings::PLAYER;
 use tcod::colors::*;
 

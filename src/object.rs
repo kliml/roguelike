@@ -195,6 +195,11 @@ pub enum Item {
     Mana,
 }
 
+pub enum UseResult {
+    UsedUp,
+    Cancelled,
+}
+
 pub const INVENTORY_SIZE: usize = 26;
 
 pub fn pick_item_up(object_id: usize, game: &mut Game, objects: &mut Vec<Object>) {
@@ -212,6 +217,13 @@ pub fn pick_item_up(object_id: usize, game: &mut Game, objects: &mut Vec<Object>
             .add(format!("You picked up a {}!", item.name), GREEN);
         game.inventory.push(item);
     }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum PlayerAction {
+    TookTurn,
+    DidntTakeTurn,
+    Exit,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]

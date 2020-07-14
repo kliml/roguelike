@@ -4,10 +4,9 @@ use crate::game::menu;
 use crate::game::{next_level, Game};
 use crate::map;
 use crate::object::items::{ use_item, drop_item };
-use crate::object::{self, *};
-use crate::PlayerAction::{self, *};
+use crate::object::{self, PlayerAction::*, *};
 use crate::Tcod;
-use crate::UseResult;
+use crate::object::UseResult;
 
 use crate::settings::*;
 

@@ -18,9 +18,6 @@ use object::Object;
 use game::*;
 use settings::*;
 
-// Inevtory width
-const INVENTORY_WIDTH: i32 = 50;
-
 // FPS Limit
 const LIMIT_FPS: i32 = 20;
 
@@ -36,18 +33,6 @@ pub struct Tcod {
     fov: FovMap,
     key: Key,
     mouse: Mouse,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum PlayerAction {
-    TookTurn,
-    DidntTakeTurn,
-    Exit,
-}
-
-pub enum UseResult {
-    UsedUp,
-    Cancelled,
 }
 
 fn main() {
