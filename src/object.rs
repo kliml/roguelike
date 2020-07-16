@@ -1,5 +1,6 @@
 pub mod items;
 pub mod spells;
+pub mod perks;
 
 use tcod::colors::*;
 use tcod::console::*;
@@ -12,7 +13,7 @@ use crate::Game;
 pub struct Object {
     pub x: i32,
     pub y: i32,
-    char: char,
+    pub char: char,
     pub color: Color,
     pub name: String,
     pub blocks: bool,

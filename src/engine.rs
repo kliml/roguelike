@@ -6,7 +6,7 @@ use crate::map;
 use crate::object::items::{ use_item, drop_item };
 use crate::object::{self, PlayerAction::*, *};
 use crate::Tcod;
-use crate::object::UseResult;
+use crate::object::{ UseResult , perks::*};
 
 use crate::settings::*;
 
@@ -97,13 +97,21 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
             }
             DidntTakeTurn
         }
-        // Move to the next floor
+        // Move to the next floor or consume corps
         (Key { code: Text, .. }, "f", true) => {
             let player_on_stairs = objects
                 .iter()
                 .any(|object| object.pos() == objects[PLAYER].pos() && object.name == "stairs");
             if player_on_stairs {
                 next_level(tcod, game, objects);
+                return DidntTakeTurn;
+            }
+            if game.perks.iter().any(|perk| perk == &Perks::Scavenger) {
+                if let Some(dead_monster_id) = objects
+                    .iter()
+                    .position(|object| object.pos() == objects[PLAYER].pos() && object.char == '%') {
+                        trigger_scavenger(dead_monster_id, game, objects);
+                    }
             }
             DidntTakeTurn
         }

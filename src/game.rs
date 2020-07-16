@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 use crate::ai;
 use crate::engine::handle_keys;
 use crate::map;
-use crate::object::{ self, DeathCallback, Fighter, Object, PlayerAction};
+use crate::object::{ self, DeathCallback, Fighter, Object, PlayerAction, perks::Perks};
 use crate::renderer::*;
 use crate::settings::*;
 use crate::Tcod;
@@ -32,6 +32,8 @@ pub struct Game {
     pub dungeon_level: u32,
     pub spells: Vec<Spells>,
     pub unknown_spells: Vec<Spells>,
+    pub perks: Vec<Perks>,
+    pub unobtained_perks: Vec<Perks>,
 }
 
 pub fn new_game(tcod: &mut Tcod) -> (Game, Vec<Object>) {
@@ -64,7 +66,11 @@ pub fn new_game(tcod: &mut Tcod) -> (Game, Vec<Object>) {
         unknown_spells: vec![
             Spells::Fireball,
             Spells::Wall,
-        ]
+        ],
+        perks: vec![
+            Perks::Scavenger,
+        ],
+        unobtained_perks: vec![],
     };
 
     initialise_fov(tcod, &game.map);
