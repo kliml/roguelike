@@ -2,11 +2,11 @@ use tcod::colors::*;
 
 use crate::help::mut_two;
 use crate::map;
+use crate::settings::PLAYER;
 use crate::Game;
 use crate::Map;
 use crate::Object;
 use crate::Tcod;
-use crate::settings::PLAYER;
 
 use crate::object::Effect;
 

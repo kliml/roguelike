@@ -3,8 +3,8 @@ use std::cmp;
 use super::object::Object;
 use crate::game::Game;
 use crate::renderer::*;
-use crate::Tcod;
 use crate::settings::PLAYER;
+use crate::Tcod;
 use tcod::input::Mouse;
 use tcod::map::Map as FovMap;
 

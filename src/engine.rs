@@ -3,10 +3,10 @@ use tcod::input::Key;
 use crate::game::menu;
 use crate::game::{next_level, Game};
 use crate::map;
-use crate::object::items::{ use_item, drop_item };
+use crate::object::items::{drop_item, use_item};
 use crate::object::{self, PlayerAction::*, *};
+use crate::object::{perks::*, UseResult};
 use crate::Tcod;
-use crate::object::{ UseResult , perks::*};
 
 use crate::settings::*;
 
@@ -70,7 +70,7 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
             DidntTakeTurn
         }
         // Drop item
-        (Key { code: Text, ..}, "r", true) => {
+        (Key { code: Text, .. }, "r", true) => {
             let inventory_index = menu::inventory_menu(
                 &game.inventory,
                 "Press the key next to an item to drop it, or any other to cancel.\n",
@@ -109,9 +109,11 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
             if game.perks.iter().any(|perk| perk == &Perks::Scavenger) {
                 if let Some(dead_monster_id) = objects
                     .iter()
-                    .position(|object| object.pos() == objects[PLAYER].pos() && object.char == '%') {
-                        trigger_scavenger(dead_monster_id, game, objects);
-                    }
+                    .position(|object| object.pos() == objects[PLAYER].pos() && object.char == '%')
+                {
+                    trigger_scavenger(dead_monster_id, game, objects);
+                    return TookTurn;
+                }
             }
             DidntTakeTurn
         }
@@ -152,7 +154,7 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
             }
             DidntTakeTurn
         }
-        (Key { code: Text, ..}, "n", true) => {
+        (Key { code: Text, .. }, "n", true) => {
             objects[PLAYER].fighter.as_mut().unwrap().xp += 100;
             DidntTakeTurn
         }

@@ -1,6 +1,6 @@
+use crate::settings::*;
 use crate::*;
 use tcod::colors::*;
-use crate::settings::*;
 
 pub fn render_all(tcod: &mut Tcod, game: &mut Game, objects: &Vec<Object>, fov_recompute: bool) {
     if fov_recompute {

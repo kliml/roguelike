@@ -1,6 +1,6 @@
 pub mod items;
-pub mod spells;
 pub mod perks;
+pub mod spells;
 
 use tcod::colors::*;
 use tcod::console::*;

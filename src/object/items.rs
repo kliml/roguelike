@@ -1,6 +1,6 @@
-use crate::{closest_monster, object, Game, Object, Tcod};
 use crate::object::UseResult;
 use crate::settings::PLAYER;
+use crate::{closest_monster, object, Game, Object, Tcod};
 use tcod::colors::*;
 
 pub fn use_item(inventory_id: usize, tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
@@ -69,8 +69,7 @@ pub fn cast_mana(
             game.messages.add("You are already at full mana.", RED);
             return UseResult::Cancelled;
         }
-        game.messages
-            .add("You retore your energy!", LIGHT_VIOLET);
+        game.messages.add("You retore your energy!", LIGHT_VIOLET);
         objects[PLAYER].recover_mana(MANA_AMOUNT);
         return UseResult::UsedUp;
     }

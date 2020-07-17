@@ -182,7 +182,6 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
         let y = rand::thread_rng().gen_range(room.y1 + 1, room.y2);
 
         if !is_blocked(x, y, map, objects) {
-
             let monster = if rand::random::<f32>() < 0.8 {
                 let mut ork = Object::new(x, y, 'o', DESATURATED_GREEN, "ork", true);
                 ork.alive = true;
@@ -231,8 +230,7 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
                 object.item = Some(Item::Heal);
                 object
             } else {
-                let mut object =
-                    Object::new(x, y, '!', LIGHT_BLUE, "mana potion", false);
+                let mut object = Object::new(x, y, '!', LIGHT_BLUE, "mana potion", false);
                 object.item = Some(Item::Mana);
                 object
             };

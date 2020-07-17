@@ -2,10 +2,10 @@ use serde::{Deserialize, Serialize};
 use std::fmt::{self, Formatter};
 use tcod::colors::*;
 
-use crate::object::{Effect, Object, StatusEffect, Fighter, DeathCallback, UseResult};
+use crate::help::*;
+use crate::object::{DeathCallback, Effect, Fighter, Object, StatusEffect, UseResult};
 use crate::settings::*;
 use crate::{closest_monster, Game, Tcod};
-use crate::help::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum Spells {
@@ -155,7 +155,6 @@ const WALL_SIZE: i32 = 1;
 const WALL_HP: i32 = 1;
 const WALL_MANA_COST: i32 = 5;
 fn cast_wall(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> UseResult {
-
     if objects[PLAYER].fighter.map_or(0, |f| f.mana) >= WALL_MANA_COST {
         game.messages.add(
             "Left-click a target tile for the Wall, or right-click to cancel.",
@@ -178,9 +177,7 @@ fn cast_wall(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> Use
         });
         objects.push(wall);
         game.messages.add(
-            format!(
-                "The ground shaters, blocking several tiles!",
-            ),
+            format!("The ground shaters, blocking several tiles!",),
             BRASS,
         );
         objects[PLAYER].fighter.as_mut().unwrap().mana -= WALL_MANA_COST;

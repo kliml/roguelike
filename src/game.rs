@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 use crate::ai;
 use crate::engine::handle_keys;
 use crate::map;
-use crate::object::{ self, DeathCallback, Fighter, Object, PlayerAction, perks::Perks};
+use crate::object::{self, perks::Perks, DeathCallback, Fighter, Object, PlayerAction};
 use crate::renderer::*;
 use crate::settings::*;
 use crate::Tcod;
@@ -58,18 +58,9 @@ pub fn new_game(tcod: &mut Tcod) -> (Game, Vec<Object>) {
         messages: Messages::new(),
         inventory: vec![],
         dungeon_level: 1,
-        spells: vec![
-            Spells::Heal,
-            Spells::Lightning,
-            Spells::Freeze,
-        ],
-        unknown_spells: vec![
-            Spells::Fireball,
-            Spells::Wall,
-        ],
-        perks: vec![
-            Perks::Scavenger,
-        ],
+        spells: vec![Spells::Heal, Spells::Lightning, Spells::Freeze],
+        unknown_spells: vec![Spells::Fireball, Spells::Wall],
+        perks: vec![Perks::Scavenger],
         unobtained_perks: vec![],
     };
 
@@ -164,7 +155,7 @@ pub fn next_level(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
 
     // Give xp for finishing floor
     objects[PLAYER].fighter.as_mut().unwrap().xp += 350 * game.dungeon_level as i32;
-    
+
     game.dungeon_level += 1;
     game.map = make_map(objects);
     initialise_fov(tcod, &game.map);
@@ -184,16 +175,20 @@ pub fn level_up(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
         );
 
         let fighter = objects[PLAYER].fighter.as_mut().unwrap();
-        
+
         let mut options = vec![
             format!("+20 HP, from {}", fighter.max_hp),
             format!("+20 MP, from {}", fighter.max_mana),
         ];
 
-        let mut spells_to_learn: Vec<String> = game.unknown_spells.iter().map(|item| item.to_string().clone()).collect();
+        let mut spells_to_learn: Vec<String> = game
+            .unknown_spells
+            .iter()
+            .map(|item| item.to_string().clone())
+            .collect();
 
         options.append(&mut spells_to_learn);
-        
+
         let mut choice = None;
         while choice.is_none() {
             choice = menu::menu(
@@ -214,8 +209,9 @@ pub fn level_up(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
                 fighter.mana += 20;
             }
             _ => {
-                game.spells.push(game.unknown_spells.remove(choice.unwrap() - 2));
-            },
+                game.spells
+                    .push(game.unknown_spells.remove(choice.unwrap() - 2));
+            }
         }
     }
 }
