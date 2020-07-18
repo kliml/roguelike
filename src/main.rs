@@ -42,7 +42,7 @@ fn main() {
         .font("res/arial10x10.png", FontLayout::Tcod)
         .font_type(FontType::Greyscale)
         .size(SCREEN_WIDTH, SCREEN_HEIGHT)
-        .title("roguelike")
+        .title("wizard dungeon")
         .init();
 
     let mut tcod = Tcod {
