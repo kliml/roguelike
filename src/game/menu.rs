@@ -142,8 +142,6 @@ pub fn inventory_menu(inventory: &Vec<Object>, header: &str, root: &mut Root) ->
 }
 
 pub fn spell_menu(spells: &Vec<Spells>, header: &str, root: &mut Root) -> Option<usize> {
-    let header = "Choose your spell!";
-
     let options = if spells.len() == 0 {
         vec!["Invetory is empty.".into()]
     } else {
