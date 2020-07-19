@@ -8,7 +8,7 @@ mod help;
 mod map;
 mod object;
 mod renderer;
-mod settings;
+pub mod settings;
 
 use help::closest_monster;
 use help::get_names_under_mouse;

@@ -8,6 +8,7 @@ use tcod::console::*;
 use serde::{Deserialize, Serialize};
 
 use crate::Game;
+use items::Item;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Object {
@@ -189,12 +190,12 @@ pub enum Ai {
     Basic,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
-pub enum Item {
-    Heal,
-    Lightning,
-    Mana,
-}
+// #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+// pub enum Item {
+//     Heal,
+//     Lightning,
+//     Mana,
+// }
 
 pub enum UseResult {
     UsedUp,

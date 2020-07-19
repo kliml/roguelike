@@ -7,7 +7,9 @@ use serde::{Deserialize, Serialize};
 use crate::game::Game;
 use crate::help::mut_two;
 use crate::object::*;
-use crate::settings::PLAYER;
+use crate::settings::*;
+
+use items::Item;
 
 pub const MAP_WIDTH: i32 = 80;
 pub const MAP_HEIGHT: i32 = 43;

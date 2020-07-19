@@ -2,15 +2,25 @@ use crate::object::UseResult;
 use crate::settings::PLAYER;
 use crate::{closest_monster, object, Game, Object, Tcod};
 use tcod::colors::*;
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub enum Item {
+    Heal,
+    Lightning,
+    Mana,
+    Vision,
+}
 
 pub fn use_item(inventory_id: usize, tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
-    use object::Item::*;
+    use Item::*;
 
     if let Some(item) = game.inventory[inventory_id].item {
         let on_use = match item {
             Heal => cast_heal,
             Lightning => cast_lightning,
             Mana => cast_mana,
+            Vision => cast_vision,
         };
         match on_use(inventory_id, tcod, game, objects) {
             UseResult::UsedUp => {
@@ -100,4 +110,20 @@ pub fn cast_lightning(
         game.messages.add("No enemy is close enough to strike", RED);
         UseResult::Cancelled
     }
+}
+
+pub fn cast_vision (
+    _inventory_id: usize,
+    _tcod: &mut Tcod,
+    game: &mut Game,
+    _objects: &mut Vec<Object>,
+) -> UseResult {
+    use crate::map;
+    
+    for x in 0..map::MAP_WIDTH {
+        for y in 0..map::MAP_HEIGHT {
+            game.map[x as usize][y as usize].explored = true;
+        }
+    }
+    UseResult::UsedUp
 }
