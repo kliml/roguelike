@@ -1,4 +1,5 @@
-use rand::Rng;
+use rand::distributions::WeightedIndex;
+use rand::prelude::*;
 use std::cmp;
 use tcod::colors::*;
 
@@ -221,27 +222,33 @@ fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
 
     let num_items = rand::thread_rng().gen_range(0, MAX_ROOM_ITEMS + 1);
 
+    let items = [(Item::Heal, 4), (Item::Mana, 4), (Item::Vision, 1)];
+    let items_dist = WeightedIndex::new(items.iter().map(|item| item.1)).unwrap();
+    let mut rng = thread_rng();
+
     for _ in 0..num_items {
         let x = rand::thread_rng().gen_range(room.x1 + 1, room.x2);
         let y = rand::thread_rng().gen_range(room.y1 + 1, room.y2);
 
         if !is_blocked(x, y, map, objects) {
-            let dice = rand::random::<f32>();
-            let mut item = if dice < 0.7 {
-                let mut object = Object::new(x, y, '!', VIOLET, "healing potion", false);
-                object.item = Some(Item::Heal);
-                object
-            } else {
-                let mut object = Object::new(x, y, '!', LIGHT_BLUE, "mana potion", false);
-                object.item = Some(Item::Mana);
-                object
+            let mut item = match items[items_dist.sample(&mut rng)].0 {
+                Item::Heal => {
+                    let mut object = Object::new(x, y, '!', VIOLET, "healing potion", false);
+                    object.item = Some(Item::Heal);
+                    object
+                }
+                Item::Mana => {
+                    let mut object = Object::new(x, y, '!', LIGHT_BLUE, "mana potion", false);
+                    object.item = Some(Item::Mana);
+                    object
+                }
+                Item::Vision => {
+                    let mut object = Object::new(x, y, '$', PINK, "vision scroll", false);
+                    object.item = Some(Item::Vision);
+                    object
+                }
+                _ => unreachable!(),
             };
-            // } else {
-            //     let mut object =
-            //         Object::new(x, y, '#', LIGHT_YELLOW, "scroll of lightning bolt", false);
-            //     object.item = Some(Item::Lightning);
-            //     object
-            // };
             item.always_visible = true;
             objects.push(item);
         }

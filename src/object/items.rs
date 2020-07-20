@@ -1,8 +1,8 @@
 use crate::object::UseResult;
 use crate::settings::PLAYER;
 use crate::{closest_monster, object, Game, Object, Tcod};
-use tcod::colors::*;
 use serde::{Deserialize, Serialize};
+use tcod::colors::*;
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Item {
@@ -112,14 +112,14 @@ pub fn cast_lightning(
     }
 }
 
-pub fn cast_vision (
+pub fn cast_vision(
     _inventory_id: usize,
     _tcod: &mut Tcod,
     game: &mut Game,
     _objects: &mut Vec<Object>,
 ) -> UseResult {
     use crate::map;
-    
+
     for x in 0..map::MAP_WIDTH {
         for y in 0..map::MAP_HEIGHT {
             game.map[x as usize][y as usize].explored = true;
