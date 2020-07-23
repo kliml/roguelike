@@ -178,53 +178,59 @@ pub fn make_map(objects: &mut Vec<Object>) -> Map {
 }
 
 fn place_objects(room: Rect, map: &Map, objects: &mut Vec<Object>) {
+    let mut rng = thread_rng();
+
     let num_monsters = rand::thread_rng().gen_range(0, MAX_ROOM_MONSTERS + 1);
+    let monsters = [("ork", 8), ("troll", 2)];
+    let monsters_dist = WeightedIndex::new(monsters.iter().map(|monster| monster.1)).unwrap();
 
     for _ in 0..num_monsters {
         let x = rand::thread_rng().gen_range(room.x1 + 1, room.x2);
         let y = rand::thread_rng().gen_range(room.y1 + 1, room.y2);
 
         if !is_blocked(x, y, map, objects) {
-            let monster = if rand::random::<f32>() < 0.8 {
-                let mut ork = Object::new(x, y, 'o', DESATURATED_GREEN, "ork", true);
-                ork.alive = true;
-                ork.fighter = Some(Fighter {
-                    max_hp: 10,
-                    hp: 10,
-                    max_mana: 0,
-                    mana: 0,
-                    defense: 0,
-                    power: 3,
-                    xp: 35,
-                    on_death: DeathCallback::Monster,
-                });
-                ork.ai = Some(Ai::Basic);
-                ork
-            } else {
-                let mut troll = Object::new(x, y, 'T', DARKER_GREEN, "troll", true);
-                troll.alive = true;
-                troll.fighter = Some(Fighter {
-                    max_hp: 16,
-                    hp: 16,
-                    max_mana: 0,
-                    mana: 0,
-                    defense: 1,
-                    power: 4,
-                    xp: 100,
-                    on_death: DeathCallback::Monster,
-                });
-                troll.ai = Some(Ai::Basic);
-                troll
+            let monster = match monsters[monsters_dist.sample(&mut rng)].0 {
+                "ork" => {
+                    let mut ork = Object::new(x, y, 'o', DESATURATED_GREEN, "ork", true);
+                    ork.alive = true;
+                    ork.fighter = Some(Fighter {
+                        max_hp: 10,
+                        hp: 10,
+                        max_mana: 0,
+                        mana: 0,
+                        defense: 0,
+                        power: 3,
+                        xp: 35,
+                        on_death: DeathCallback::Monster,
+                    });
+                    ork.ai = Some(Ai::Basic);
+                    ork
+                }
+                "troll" => {
+                    let mut troll = Object::new(x, y, 'T', DARKER_GREEN, "troll", true);
+                    troll.alive = true;
+                    troll.fighter = Some(Fighter {
+                        max_hp: 16,
+                        hp: 16,
+                        max_mana: 0,
+                        mana: 0,
+                        defense: 1,
+                        power: 4,
+                        xp: 100,
+                        on_death: DeathCallback::Monster,
+                    });
+                    troll.ai = Some(Ai::Basic);
+                    troll
+                }
+                _ => unreachable!(),
             };
             objects.push(monster);
         }
     }
 
     let num_items = rand::thread_rng().gen_range(0, MAX_ROOM_ITEMS + 1);
-
     let items = [(Item::Heal, 4), (Item::Mana, 4), (Item::Vision, 1)];
     let items_dist = WeightedIndex::new(items.iter().map(|item| item.1)).unwrap();
-    let mut rng = thread_rng();
 
     for _ in 0..num_items {
         let x = rand::thread_rng().gen_range(room.x1 + 1, room.x2);
