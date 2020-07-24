@@ -4,7 +4,7 @@ use crate::game::menu;
 use crate::game::{next_level, Game};
 use crate::map;
 use crate::object::items::{drop_item, use_item};
-use crate::object::{self, PlayerAction::*, *};
+use crate::object::{self, perks, PlayerAction::*, *};
 use crate::object::{perks::*, UseResult};
 use crate::Tcod;
 
@@ -93,6 +93,41 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
                 match spells::cast_spell(spell, tcod, game, objects) {
                     UseResult::Cancelled => return DidntTakeTurn,
                     UseResult::UsedUp => return TookTurn,
+                }
+            }
+            DidntTakeTurn
+        }
+        // Perks
+        (Key { code: Text, .. }, "p", true) => {
+            let perk_id = menu::perk_menu(
+                &game.unobtained_perks,
+                "Press the key next to an spell to use it, or any other to cancel.\n",
+                &mut tcod.root,
+            );
+            if let Some(perk_id) = perk_id {
+                let perk = game.unobtained_perks[perk_id];
+                match perk {
+                    Perks::Scavenger => {
+                        game.perks.push(
+                            game.unobtained_perks.remove(
+                                game.unobtained_perks
+                                    .iter()
+                                    .position(|p| p == &perk)
+                                    .unwrap(),
+                            ),
+                        );
+                    }
+                    Perks::MagicCannon => {
+                        game.perks.push(
+                            game.unobtained_perks.remove(
+                                game.unobtained_perks
+                                    .iter()
+                                    .position(|p| p == &perk)
+                                    .unwrap(),
+                            ),
+                        );
+                        perks::trigger_magic_cannon(game, objects);
+                    }
                 }
             }
             DidntTakeTurn

@@ -152,3 +152,15 @@ pub fn spell_menu(spells: &Vec<Spells>, header: &str, root: &mut Root) -> Option
 
     spell_id
 }
+
+pub fn perk_menu(perks: &Vec<Perks>, header: &str, root: &mut Root) -> Option<usize> {
+    let options = if perks.len() == 0 {
+        vec!["Invetory is empty.".into()]
+    } else {
+        perks.iter().map(|item| item.to_string().clone()).collect()
+    };
+
+    let spell_id = menu(header, &options, INVENTORY_WIDTH, root);
+
+    spell_id
+}

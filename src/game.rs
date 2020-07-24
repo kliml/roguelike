@@ -60,8 +60,8 @@ pub fn new_game(tcod: &mut Tcod) -> (Game, Vec<Object>) {
         dungeon_level: 1,
         spells: vec![Spells::Heal, Spells::Lightning, Spells::Freeze],
         unknown_spells: vec![Spells::Fireball, Spells::Wall],
-        perks: vec![Perks::Scavenger],
-        unobtained_perks: vec![],
+        perks: vec![],
+        unobtained_perks: vec![Perks::MagicCannon, Perks::Scavenger],
     };
 
     initialise_fov(tcod, &game.map);
