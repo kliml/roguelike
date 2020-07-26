@@ -112,6 +112,7 @@ fn cast_freeze(_tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> 
 const FIREBALL_RADIUS: i32 = 3;
 const FIREBALL_DAMAGE: i32 = 12;
 const FIREBALL_MANA_COST: i32 = 7;
+const BURN_DURATION: i32 = 3;
 fn cast_fireball(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) -> UseResult {
     if objects[PLAYER].fighter.map_or(0, |f| f.mana) >= FIREBALL_MANA_COST {
         game.messages.add(
@@ -141,7 +142,12 @@ fn cast_fireball(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) ->
                 );
                 if let Some(xp) = obj.take_damage(FIREBALL_DAMAGE, game) {
                     xp_to_gain += xp;
-                };
+                } else {
+                    obj.effect = Some(StatusEffect {
+                        effect: Effect::Burning,
+                        turns_left: BURN_DURATION,
+                    });
+                }
             }
         }
         objects[PLAYER].fighter.as_mut().unwrap().xp += xp_to_gain;

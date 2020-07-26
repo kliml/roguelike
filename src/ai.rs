@@ -35,20 +35,43 @@ pub fn ai_take_turn(monster_id: usize, tcod: &Tcod, game: &mut Game, objects: &m
                 }
                 (Effect::Frozen, _) => {
                     objects[monster_id].color = LIGHT_BLUE;
-                    effect.turns_left -= 1;
-                    objects[monster_id].effect = Some(effect);
+                    objects[monster_id].effect.as_mut().unwrap().turns_left -= 1;
+                    return;
+                }
+                (Effect::Burning, 0) => {
+                    objects[monster_id].color = DARK_ORANGE;
+                    objects[monster_id].effect = None;
+                    return;
+                }
+                (Effect::Burning, _) => {
+                    objects[monster_id].color = AMBER;
+                    objects[monster_id].take_damage(1, game);
+                    objects[monster_id].effect.as_mut().unwrap().turns_left -= 1;
+                    default(monster_id, tcod, game, objects);
                     return;
                 }
             }
         }
 
-        // Move or attack depending on distance
-        if objects[monster_id].distance_to(&objects[PLAYER]) >= 2.0 {
-            let (player_x, player_y) = objects[PLAYER].pos();
-            move_towards(monster_id, player_x, player_y, &game.map, objects);
-        } else {
-            let (monster, player) = mut_two(monster_id, PLAYER, objects);
-            monster.attack(player, game);
-        }
+        // // Move or attack depending on distance
+        // if objects[monster_id].distance_to(&objects[PLAYER]) >= 2.0 {
+        //     let (player_x, player_y) = objects[PLAYER].pos();
+        //     move_towards(monster_id, player_x, player_y, &game.map, objects);
+        // } else {
+        //     let (monster, player) = mut_two(monster_id, PLAYER, objects);
+        //     monster.attack(player, game);
+        // }
+        default(monster_id, tcod, game, objects);
+    }
+}
+
+pub fn default(monster_id: usize, _tcod: &Tcod, game: &mut Game, objects: &mut Vec<Object>) {
+    // Move or attack depending on distance
+    if objects[monster_id].distance_to(&objects[PLAYER]) >= 2.0 {
+        let (player_x, player_y) = objects[PLAYER].pos();
+        move_towards(monster_id, player_x, player_y, &game.map, objects);
+    } else {
+        let (monster, player) = mut_two(monster_id, PLAYER, objects);
+        monster.attack(player, game);
     }
 }
