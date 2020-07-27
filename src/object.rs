@@ -190,13 +190,6 @@ pub enum Ai {
     Basic,
 }
 
-// #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
-// pub enum Item {
-//     Heal,
-//     Lightning,
-//     Mana,
-// }
-
 pub enum UseResult {
     UsedUp,
     Cancelled,

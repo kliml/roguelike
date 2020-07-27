@@ -114,6 +114,7 @@ pub fn play_game(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
         }
 
         if objects[PLAYER].alive && player_action == PlayerAction::TookTurn {
+            check_status_effect(tcod, game, objects);
             for id in 1..objects.len() {
                 if objects[id].ai.is_some() {
                     ai::ai_take_turn(id, tcod, game, objects);
@@ -212,6 +213,23 @@ pub fn level_up(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
                 game.spells
                     .push(game.unknown_spells.remove(choice.unwrap() - 2));
             }
+        }
+    }
+}
+
+pub fn check_status_effect(_tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) {
+    use object::Effect;
+    if let Some(status_effect) = objects[PLAYER].effect {
+        match (status_effect.effect, status_effect.turns_left) {
+            (Effect::Burning, 0) => {
+                objects[PLAYER].effect = None;
+            }
+            (Effect::Burning, _) => {
+                game.messages
+                    .add("You take damage from burning!", LIGHT_RED);
+                objects[PLAYER].effect.as_mut().unwrap().turns_left -= 1;
+            }
+            _ => unimplemented!(),
         }
     }
 }
