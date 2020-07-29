@@ -128,6 +128,16 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
                         );
                         perks::trigger_magic_cannon(game, objects);
                     }
+                    Perks::FireImmunity => {
+                        game.perks.push(
+                            game.unobtained_perks.remove(
+                                game.unobtained_perks
+                                    .iter()
+                                    .position(|p| p == &perk)
+                                    .unwrap(),
+                            ),
+                        );
+                    }
                 }
             }
             DidntTakeTurn

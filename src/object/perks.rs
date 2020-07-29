@@ -10,6 +10,7 @@ use tcod::colors::*;
 pub enum Perks {
     Scavenger,
     MagicCannon,
+    FireImmunity,
 }
 
 impl fmt::Display for Perks {
