@@ -11,6 +11,7 @@ pub enum Perks {
     Scavenger,
     MagicCannon,
     FireImmunity,
+    FreezeImmunity,
 }
 
 impl fmt::Display for Perks {

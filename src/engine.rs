@@ -138,6 +138,16 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
                             ),
                         );
                     }
+                    Perks::FreezeImmunity => {
+                        game.perks.push(
+                            game.unobtained_perks.remove(
+                                game.unobtained_perks
+                                    .iter()
+                                    .position(|p| p == &perk)
+                                    .unwrap(),
+                            ),
+                        );
+                    }
                 }
             }
             DidntTakeTurn
@@ -168,6 +178,7 @@ pub fn handle_keys(tcod: &mut Tcod, game: &mut Game, objects: &mut Vec<Object>) 
             let level = player.level;
             let level_up_xp = LEVEL_UP_BASE + player.level * LEVEL_UP_FACTOR;
             let known_spells = game.spells.len();
+            //let perks = game.perks.into_iter().map(|p| p.to_string());
             if let Some(fighter) = player.fighter.as_ref() {
                 let msg = format!(
                     "Character information\n \
